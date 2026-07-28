@@ -1,14 +1,16 @@
 /* =========================================================
-   DISEÑO UX/UI ULTRA-PREMIUM MOBILE FIRST ✨💌 2.0
+   DISEÑO UX/UI ULTRA-PREMIUM 3.0 (CARTA 3D, NO SCROLL & NAV BARS) ✨
    ========================================================= */
 
 :root {
-  --bg-gradient: radial-gradient(circle at 50% 0%, #ffe3ec 0%, #fff0f5 45%, #f4e8f7 100%);
+  --bg-color: #ffe3ec;
+  --bg-gradient: linear-gradient(180deg, #ffe3ec 0%, #fff0f5 40%, #f4e8f7 100%);
   --primary-pink: #ff4770;
   --primary-hover: #e6325a;
   --primary-light: #fff0f3;
   --gold-accent: #d4af37;
-  --card-bg: rgba(255, 255, 255, 0.94);
+  --gold-gradient: linear-gradient(135deg, #f3d078 0%, #d4af37 50%, #aa820a 100%);
+  --card-bg: rgba(255, 255, 255, 0.96);
   --card-shadow: 0 16px 36px rgba(255, 71, 112, 0.14), 0 4px 16px rgba(0, 0, 0, 0.03);
   --text-main: #2b1b22;
   --text-muted: #6e5560;
@@ -32,6 +34,7 @@ html, body {
   overflow-x: hidden;
   min-height: 100vh;
   min-height: 100dvh;
+  background-color: var(--bg-color);
 }
 
 body {
@@ -45,13 +48,13 @@ body {
   padding: 0;
 }
 
-/* Container Principal Adaptable al Viewport del Móvil */
+/* Container Principal Móvil */
 .app-container {
   width: 100%;
-  max-width: 410px;
+  max-width: 400px;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 1rem 0.85rem;
+  padding: 0.75rem 0.75rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -61,13 +64,13 @@ body {
   overflow-x: hidden;
 }
 
-/* Tarjeta Principal Glassmorphism Refinada */
+/* Tarjeta Principal Compacta sin Scroll */
 .disney-card {
   background: var(--card-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-radius: 26px;
-  padding: 1.6rem 1.25rem;
+  border-radius: 24px;
+  padding: 1.2rem 1.1rem;
   box-shadow: var(--card-shadow);
   border: 1.5px solid rgba(255, 255, 255, 0.98);
   width: 100%;
@@ -76,59 +79,51 @@ body {
   position: relative;
   z-index: 20;
   box-sizing: border-box;
-  max-height: calc(100dvh - 2rem);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
-/* Ocultar barra de scroll interna en la tarjeta para máxima elegancia */
-.disney-card::-webkit-scrollbar {
-  display: none;
-}
-
-/* Badge Tierno de Pronta Recuperación */
+/* Badge Tierno Pronta Recuperación */
 .getwell-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   background: linear-gradient(135deg, #fff0f3 0%, #ffe4eb 100%);
   border: 1.5px solid #ffccd5;
-  padding: 0.4rem 0.95rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 50px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--primary-pink);
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(255, 71, 112, 0.08);
+  margin-bottom: 0.6rem;
+  box-shadow: 0 4px 10px rgba(255, 71, 112, 0.08);
   line-height: 1.2;
 }
 
-/* Tipografía de Carta Dedicada */
+/* Tipografías */
 .letter-recipient-title {
   font-family: var(--font-accent);
-  font-size: 2.7rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: var(--primary-pink);
   line-height: 1.1;
-  margin-top: 0.2rem;
+  margin-top: 0.1rem;
   margin-bottom: 0.1rem;
   letter-spacing: -0.5px;
 }
 
 .disney-title-serif {
   font-family: var(--font-serif);
-  font-size: 1.55rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: var(--text-main);
-  line-height: 1.28;
-  margin-bottom: 0.35rem;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
   letter-spacing: -0.3px;
 }
 
 .disney-title-accent {
   font-family: var(--font-accent);
-  font-size: 2.1rem;
+  font-size: 2rem;
   color: var(--primary-pink);
   line-height: 1.1;
   margin-bottom: 0.1rem;
@@ -136,11 +131,11 @@ body {
 }
 
 .disney-subtitle {
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   color: var(--text-muted);
   font-weight: 500;
-  line-height: 1.4;
-  margin-bottom: 1.2rem;
+  line-height: 1.35;
+  margin-bottom: 0.9rem;
 }
 
 /* Botones Principales */
@@ -148,22 +143,20 @@ body {
   background: linear-gradient(135deg, #ff4770 0%, #ff6588 100%);
   color: white;
   font-family: var(--font-heading);
-  font-size: 1.08rem;
+  font-size: 1.02rem;
   font-weight: 700;
-  padding: 0.88rem 1.3rem;
+  padding: 0.82rem 1.2rem;
   border-radius: 50px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 8px 22px rgba(255, 71, 112, 0.32);
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 20px rgba(255, 71, 112, 0.32);
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   width: 100%;
-  max-width: 100%;
   outline: none;
-  box-sizing: border-box;
 }
 
 .btn-disney-primary:active {
@@ -174,75 +167,120 @@ body {
   background: white;
   color: var(--primary-pink);
   font-family: var(--font-heading);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  padding: 0.72rem 1.1rem;
+  padding: 0.68rem 1rem;
   border-radius: 50px;
   border: 1.5px solid #ffccd5;
   cursor: pointer;
   transition: transform 0.15s ease;
   width: 100%;
-  max-width: 100%;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
-  box-sizing: border-box;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.03);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ESTILOS SOBRE 3D ILUSTRADO 💌 */
-.envelope-wrapper {
-  perspective: 1000px;
-  cursor: pointer;
-  margin: 1rem auto 0.8rem auto;
-  width: 195px;
-  height: 130px;
+/* =========================================================
+   SOBRE 3D REALISTA CON SELLO DE CERA DORADO 💌
+   ========================================================= */
+.envelope-3d-container {
+  margin: 0.8rem auto 1rem auto;
+  width: 190px;
+  height: 135px;
   position: relative;
+  cursor: pointer;
+  perspective: 800px;
 }
 
-.envelope-body {
+.envelope-3d-paper {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #ff7b99 0%, #ff4770 100%);
-  border-radius: 16px;
+  background: linear-gradient(145deg, #ffffff 0%, #fff2f5 100%);
+  border-radius: 12px;
   position: relative;
-  box-shadow: 0 12px 26px rgba(255, 71, 112, 0.32);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 14px 30px rgba(255, 71, 112, 0.22), 0 4px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ffe0e6;
+  overflow: hidden;
 }
 
-.envelope-flap {
+/* Solapa superior del sobre */
+.envelope-3d-topflap {
   position: absolute;
   top: 0;
   left: 0;
   width: 0;
   height: 0;
-  border-left: 97.5px solid transparent;
-  border-right: 97.5px solid transparent;
-  border-top: 75px solid #ff335e;
+  border-left: 95px solid transparent;
+  border-right: 95px solid transparent;
+  border-top: 72px solid #ff8aa3;
   transform-origin: top;
-  transition: transform 0.6s ease-in-out;
+  transition: transform 0.5s ease;
   z-index: 3;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
-.seal-heart {
+/* Pliegues laterales del sobre */
+.envelope-3d-leftfold {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 95px solid #ffb3c1;
+  border-top: 67px solid transparent;
+  border-bottom: 67px solid #ffa3b5;
+  z-index: 2;
+}
+
+.envelope-3d-rightfold {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-right: 95px solid #ffb3c1;
+  border-top: 67px solid transparent;
+  border-bottom: 67px solid #ffa3b5;
+  z-index: 2;
+}
+
+.envelope-3d-bottomfold {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 95px solid transparent;
+  border-right: 95px solid transparent;
+  border-bottom: 72px solid #ff6b8b;
+  z-index: 2;
+}
+
+/* Sello de Cera Dorado con Corazón Emboscado */
+.gold-wax-seal {
   position: absolute;
   top: 55px;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ffffff 0%, #fff0f3 100%);
+  background: var(--gold-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.16);
-  z-index: 4;
+  box-shadow: 0 4px 14px rgba(170, 130, 10, 0.45), inset 0 2px 4px rgba(255,255,255,0.6);
+  z-index: 5;
+  border: 1.5px solid #fff5d6;
+  transition: transform 0.2s ease;
 }
 
-/* FONDO DE PARTÍCULAS SUTILES TRASERAS (z-index: 0) */
+.gold-wax-seal:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Fondo de Chispas */
 .sparkle-bg {
   position: fixed;
   top: 0;
@@ -276,8 +314,8 @@ body {
 .step-indicator {
   display: flex;
   justify-content: center;
-  gap: 0.4rem;
-  margin-bottom: 0.9rem;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
 }
 
 .dot-step {
@@ -289,7 +327,7 @@ body {
 }
 
 .dot-step.active {
-  width: 22px;
+  width: 20px;
   border-radius: 12px;
   background: var(--primary-pink);
 }

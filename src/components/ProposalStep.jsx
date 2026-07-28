@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Sparkles, Mail, ThermometerSnowflake } from 'lucide-react';
+import { Heart, Sparkles, ThermometerSnowflake } from 'lucide-react';
 import { DATE_CONFIG } from '../config/dateConfig';
 
 const ProposalStep = ({ onAccept }) => {
@@ -9,15 +9,16 @@ const ProposalStep = ({ onAccept }) => {
   const [noPosition, setNoPosition] = useState(null);
   const yesBtnRef = useRef(null);
 
+  // Algoritmo de escape del botón NO estrictamente garantizado dentro del marco visible
   const dodgeNoButton = (e) => {
     if (e) {
       e.stopPropagation();
     }
-    const padding = 18;
+    const padding = 16;
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
-    const btnWidth = Math.min(180, screenWidth * 0.6);
+    const btnWidth = Math.min(170, screenWidth * 0.55);
     const btnHeight = 44;
 
     let yesBox = null;
@@ -30,10 +31,17 @@ const ProposalStep = ({ onAccept }) => {
     let isValid = false;
     let attempts = 0;
 
-    while (!isValid && attempts < 60) {
+    // Calculamos estrictamente dentro de los bordes del dispositivo
+    const minX = padding;
+    const maxX = Math.max(padding, screenWidth - btnWidth - padding);
+
+    const minY = 60; // Evitar la barra superior
+    const maxY = Math.max(minY, screenHeight - btnHeight - 60);
+
+    while (!isValid && attempts < 50) {
       attempts++;
-      newX = Math.floor(padding + Math.random() * (screenWidth - btnWidth - padding * 2));
-      newY = Math.floor(padding + Math.random() * (screenHeight - btnHeight - padding * 2));
+      newX = Math.floor(minX + Math.random() * (maxX - minX));
+      newY = Math.floor(minY + Math.random() * (maxY - minY));
 
       if (yesBox) {
         const buffer = 45;
@@ -56,7 +64,7 @@ const ProposalStep = ({ onAccept }) => {
     <div className="disney-card">
       <AnimatePresence mode="wait">
         {!isOpen ? (
-          /* ESTADO 1: SOBRE CERRADO CARTA 💌 */
+          /* ESTADO 1: SOBRE 3D ELEGANTE CON SELLO DE CERA DORADO 💌 */
           <motion.div
             key="envelope-view"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -76,17 +84,21 @@ const ProposalStep = ({ onAccept }) => {
             </h2>
             <p className="disney-subtitle">{DATE_CONFIG.envelopeSubtitle}</p>
 
+            {/* Ilustración 3D de Carta Realista */}
             <motion.div
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
-              className="envelope-wrapper"
+              className="envelope-3d-container"
             >
-              <div className="envelope-body">
-                <Mail size={42} color="#ffffff" />
-              </div>
-              <div className="envelope-flap"></div>
-              <div className="seal-heart">
-                <Heart size={18} fill="var(--primary-pink)" color="var(--primary-pink)" className="pulse-heart" />
+              <div className="envelope-3d-paper">
+                <div className="envelope-3d-topflap"></div>
+                <div className="envelope-3d-leftfold"></div>
+                <div className="envelope-3d-rightfold"></div>
+                <div className="envelope-3d-bottomfold"></div>
+                {/* Sello de Cera Dorado con Corazón */}
+                <div className="gold-wax-seal">
+                  <Heart size={18} fill="#ffffff" color="#ffffff" className="pulse-heart" />
+                </div>
               </div>
             </motion.div>
 
@@ -94,14 +106,14 @@ const ProposalStep = ({ onAccept }) => {
               animate={{ y: [0, 3, 0] }}
               transition={{ repeat: Infinity, duration: 1.8 }}
               className="btn-disney-primary"
-              style={{ marginTop: '1rem', width: '100%' }}
+              style={{ marginTop: '0.9rem', width: '100%' }}
             >
               <span>Abrir carta</span>
               <Sparkles size={16} />
             </motion.button>
           </motion.div>
         ) : (
-          /* ESTADO 2: PREGUNTA PRINCIPAL ✨ */
+          /* ESTADO 2: PREGUNTA ORGÁNICA ✨ */
           <motion.div
             key="proposal-view"
             initial={{ opacity: 0, y: 20 }}
@@ -116,7 +128,7 @@ const ProposalStep = ({ onAccept }) => {
             <h1 className="disney-title-serif">{DATE_CONFIG.proposalTitle}</h1>
             <p className="disney-subtitle">{DATE_CONFIG.proposalSubtitle}</p>
 
-            {/* Ilustración Corazón */}
+            {/* Corazón animado */}
             <motion.div
               animate={{ y: [0, -4, 0] }}
               transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
@@ -124,8 +136,8 @@ const ProposalStep = ({ onAccept }) => {
             >
               <div
                 style={{
-                  width: '72px',
-                  height: '72px',
+                  width: '68px',
+                  height: '68px',
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #ffd3e2 0%, #ff4770 100%)',
                   display: 'flex',
@@ -135,12 +147,12 @@ const ProposalStep = ({ onAccept }) => {
                   margin: '0 auto'
                 }}
               >
-                <Heart size={34} fill="#ffffff" color="#ffffff" className="pulse-heart" />
+                <Heart size={32} fill="#ffffff" color="#ffffff" className="pulse-heart" />
               </div>
             </motion.div>
 
             {/* Botones */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', position: 'relative' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', width: '100%', position: 'relative' }}>
               <button
                 ref={yesBtnRef}
                 onClick={onAccept}
@@ -162,7 +174,7 @@ const ProposalStep = ({ onAccept }) => {
               )}
             </div>
 
-            {/* Botón NO escapando */}
+            {/* Botón NO esquivo que NUNCA desaparece de pantalla */}
             {noPosition && (
               <motion.button
                 onClick={dodgeNoButton}

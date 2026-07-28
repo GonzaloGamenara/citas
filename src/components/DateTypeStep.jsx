@@ -15,20 +15,20 @@ const DateTypeStep = ({ onNext, onBack, selectedOption, setSelectedOption, custo
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.35 }}
       className="disney-card"
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', padding: '1rem 0.9rem' }}
     >
-      {/* Flecha Volver Atrás arriba a la izquierda */}
+      {/* Flecha Volver Atrás */}
       <button
         onClick={onBack}
         style={{
           position: 'absolute',
-          top: '1.2rem',
-          left: '1.2rem',
+          top: '0.8rem',
+          left: '0.8rem',
           background: '#fff0f3',
           border: '1px solid #ffccd5',
           borderRadius: '50%',
-          width: '36px',
-          height: '36px',
+          width: '32px',
+          height: '32px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -38,21 +38,21 @@ const DateTypeStep = ({ onNext, onBack, selectedOption, setSelectedOption, custo
         }}
         title="Volver atrás"
       >
-        <ArrowLeft size={18} />
+        <ArrowLeft size={16} />
       </button>
 
-      <div className="step-indicator">
+      <div className="step-indicator" style={{ marginBottom: '0.5rem' }}>
         <div className="dot-step"></div>
         <div className="dot-step active"></div>
         <div className="dot-step"></div>
       </div>
 
-      <span className="disney-title-accent">Primer paso...</span>
-      <h2 className="disney-title-serif">Elegí tu plan ✨</h2>
-      <p className="disney-subtitle">Seleccioná la opción que más te tiente</p>
+      <span className="disney-title-accent" style={{ fontSize: '1.75rem' }}>Primer paso...</span>
+      <h2 className="disney-title-serif" style={{ fontSize: '1.35rem', marginBottom: '0.15rem' }}>Elegí tu plan ✨</h2>
+      <p className="disney-subtitle" style={{ marginBottom: '0.6rem', fontSize: '0.8rem' }}>Seleccioná la opción que más te tiente</p>
 
-      {/* Lista de Opciones */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.2rem' }}>
+      {/* Lista de Opciones Compactas */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.7rem' }}>
         {DATE_CONFIG.dateOptions.map((opt) => {
           const isSelected = selectedOption === opt.id;
 
@@ -64,36 +64,37 @@ const DateTypeStep = ({ onNext, onBack, selectedOption, setSelectedOption, custo
               style={{
                 background: isSelected ? 'linear-gradient(135deg, #fff2f5 0%, #ffe6eb 100%)' : '#ffffff',
                 border: isSelected ? '2px solid var(--primary-pink)' : '1.5px solid #ffe0e6',
-                borderRadius: '18px',
-                padding: '0.85rem 1rem',
+                borderRadius: '14px',
+                padding: '0.55rem 0.8rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                boxShadow: isSelected ? '0 6px 18px rgba(255, 92, 138, 0.2)' : '0 2px 8px rgba(0,0,0,0.03)',
+                boxShadow: isSelected ? '0 4px 14px rgba(255, 92, 138, 0.18)' : '0 2px 6px rgba(0,0,0,0.02)',
                 transition: 'all 0.2s ease'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', textAlign: 'left' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', textAlign: 'left' }}>
                 <div
                   style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '14px',
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '12px',
                     background: opt.color,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '1.25rem'
+                    fontSize: '1.15rem',
+                    flexShrink: 0
                   }}
                 >
                   {opt.emoji}
                 </div>
                 <div>
-                  <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.02rem', color: 'var(--text-main)', margin: 0, fontWeight: 700 }}>
+                  <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.92rem', color: 'var(--text-main)', margin: 0, fontWeight: 700, lineHeight: 1.2 }}>
                     {opt.title}
                   </h4>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, fontWeight: 500 }}>
+                  <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', margin: 0, fontWeight: 500, lineHeight: 1.2 }}>
                     {opt.subtitle}
                   </p>
                 </div>
@@ -101,55 +102,55 @@ const DateTypeStep = ({ onNext, onBack, selectedOption, setSelectedOption, custo
 
               <div
                 style={{
-                  width: '22px',
-                  height: '22px',
+                  width: '20px',
+                  height: '20px',
                   borderRadius: '50%',
                   border: isSelected ? 'none' : '2px solid #e0e0e0',
                   background: isSelected ? 'var(--primary-pink)' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  flexShrink: 0
                 }}
               >
-                {isSelected && <Check size={14} color="white" strokeWidth={3} />}
+                {isSelected && <Check size={13} color="white" strokeWidth={3} />}
               </div>
             </motion.div>
           );
         })}
       </div>
 
-      {/* Detalle o Antojo Opcional */}
-      <div style={{ textAlign: 'left', marginBottom: '1.3rem' }}>
-        <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', display: 'block', marginBottom: '0.4rem' }}>
-          ¿Algún detalle o lugar que quieras agregar? ✨ (Opcional)
+      {/* Detalle Opcional en 1 Sola Línea Compacta */}
+      <div style={{ textAlign: 'left', marginBottom: '0.75rem' }}>
+        <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>
+          ¿Algún detalle o lugar extra? ✨ (Opcional)
         </label>
-        <textarea
+        <input
+          type="text"
           value={customNote}
           onChange={(e) => setCustomNote(e.target.value)}
-          placeholder="Ej: Ir a un lugar tranquilo, tomar un té helado..."
-          rows={2}
+          placeholder="Ej: Ir a un lugar tranquilo..."
           style={{
             width: '100%',
-            padding: '0.7rem',
-            borderRadius: '14px',
+            padding: '0.45rem 0.75rem',
+            borderRadius: '12px',
             border: '1.5px solid #ffccd5',
             outline: 'none',
             fontFamily: 'var(--font-body)',
-            fontSize: '0.85rem',
-            resize: 'none',
+            fontSize: '0.8rem',
             background: 'white'
           }}
         />
       </div>
 
-      {/* Botones de Navegación */}
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
+      {/* Botones de Navegación Accesibles de un Vistazo sin Scroll */}
+      <div style={{ display: 'flex', gap: '0.6rem' }}>
         <button
           onClick={onBack}
           className="btn-disney-secondary"
-          style={{ width: '35%', marginTop: 0 }}
+          style={{ width: '32%', padding: '0.65rem 0.5rem', fontSize: '0.86rem' }}
         >
-          <ArrowLeft size={16} inline style={{ marginRight: '4px' }} />
+          <ArrowLeft size={15} inline style={{ marginRight: '3px' }} />
           Atrás
         </button>
 
@@ -158,13 +159,15 @@ const DateTypeStep = ({ onNext, onBack, selectedOption, setSelectedOption, custo
           disabled={!selectedOption}
           className="btn-disney-primary"
           style={{
-            width: '65%',
+            width: '68%',
+            padding: '0.65rem 1rem',
+            fontSize: '0.92rem',
             opacity: !selectedOption ? 0.5 : 1,
             cursor: !selectedOption ? 'not-allowed' : 'pointer'
           }}
         >
           <span>Elegir fecha</span>
-          <ArrowRight size={18} />
+          <ArrowRight size={16} />
         </button>
       </div>
     </motion.div>
