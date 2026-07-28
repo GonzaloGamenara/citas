@@ -1,5 +1,5 @@
 /* =========================================================
-   DISEÑO UX/UI ULTRA-PREMIUM 3.0 (CARTA 3D, NO SCROLL & NAV BARS) ✨
+   DISEÑO UX/UI ULTRA-RESPONSIVO 4.0 (ADAPTACIÓN FULL 100% PANTALLA) ✨
    ========================================================= */
 
 :root {
@@ -9,9 +9,9 @@
   --primary-hover: #e6325a;
   --primary-light: #fff0f3;
   --gold-accent: #d4af37;
-  --gold-gradient: linear-gradient(135deg, #f3d078 0%, #d4af37 50%, #aa820a 100%);
+  --gold-gradient: linear-gradient(135deg, #f8db8a 0%, #d4af37 50%, #9e790a 100%);
   --card-bg: rgba(255, 255, 255, 0.96);
-  --card-shadow: 0 16px 36px rgba(255, 71, 112, 0.14), 0 4px 16px rgba(0, 0, 0, 0.03);
+  --card-shadow: 0 16px 40px rgba(255, 71, 112, 0.16), 0 4px 16px rgba(0, 0, 0, 0.04);
   --text-main: #2b1b22;
   --text-muted: #6e5560;
   --font-serif: 'Playfair Display', serif;
@@ -48,13 +48,13 @@ body {
   padding: 0;
 }
 
-/* Container Principal Móvil */
+/* Container Principal Móvil que ocupa el 100% de la pantalla */
 .app-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 430px;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 0.75rem 0.75rem;
+  padding: 0.6rem 0.6rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -64,21 +64,26 @@ body {
   overflow-x: hidden;
 }
 
-/* Tarjeta Principal Compacta sin Scroll */
+/* Tarjeta Principal Adaptada en Altura al 100% de la pantalla */
 .disney-card {
   background: var(--card-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-radius: 24px;
-  padding: 1.2rem 1.1rem;
+  border-radius: 26px;
+  padding: 1.2rem 1rem;
   box-shadow: var(--card-shadow);
   border: 1.5px solid rgba(255, 255, 255, 0.98);
   width: 100%;
   max-width: 100%;
+  min-height: calc(100dvh - 1.2rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   text-align: center;
   position: relative;
   z-index: 20;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Badge Tierno Pronta Recuperación */
@@ -94,36 +99,41 @@ body {
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--primary-pink);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.4rem;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   box-shadow: 0 4px 10px rgba(255, 71, 112, 0.08);
-  line-height: 1.2;
 }
 
-/* Tipografías */
+/* Tipografías con Ajuste Responsivo Estricto */
 .letter-recipient-title {
   font-family: var(--font-accent);
-  font-size: 2.5rem;
+  font-size: clamp(1.8rem, 6vw, 2.4rem);
   font-weight: 700;
   color: var(--primary-pink);
   line-height: 1.1;
   margin-top: 0.1rem;
   margin-bottom: 0.1rem;
-  letter-spacing: -0.5px;
+  word-wrap: break-word;
+  max-width: 100%;
 }
 
 .disney-title-serif {
   font-family: var(--font-serif);
-  font-size: 1.45rem;
+  font-size: clamp(1.25rem, 4.5vw, 1.55rem);
   font-weight: 700;
   color: var(--text-main);
   line-height: 1.25;
   margin-bottom: 0.25rem;
   letter-spacing: -0.3px;
+  word-wrap: break-word;
 }
 
 .disney-title-accent {
   font-family: var(--font-accent);
-  font-size: 2rem;
+  font-size: clamp(1.6rem, 5vw, 2rem);
   color: var(--primary-pink);
   line-height: 1.1;
   margin-bottom: 0.1rem;
@@ -131,11 +141,11 @@ body {
 }
 
 .disney-subtitle {
-  font-size: 0.84rem;
+  font-size: clamp(0.78rem, 3.2vw, 0.86rem);
   color: var(--text-muted);
   font-weight: 500;
   line-height: 1.35;
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.6rem;
 }
 
 /* Botones Principales */
@@ -143,9 +153,9 @@ body {
   background: linear-gradient(135deg, #ff4770 0%, #ff6588 100%);
   color: white;
   font-family: var(--font-heading);
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-weight: 700;
-  padding: 0.82rem 1.2rem;
+  padding: 0.85rem 1.2rem;
   border-radius: 50px;
   border: none;
   cursor: pointer;
@@ -167,9 +177,9 @@ body {
   background: white;
   color: var(--primary-pink);
   font-family: var(--font-heading);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  padding: 0.68rem 1rem;
+  padding: 0.7rem 1rem;
   border-radius: 50px;
   border: 1.5px solid #ffccd5;
   cursor: pointer;
@@ -182,102 +192,81 @@ body {
 }
 
 /* =========================================================
-   SOBRE 3D REALISTA CON SELLO DE CERA DORADO 💌
+   DISEÑO SOBRE TIPO CARTA REALISTA 💌 (Elegante & Responsivo)
    ========================================================= */
-.envelope-3d-container {
-  margin: 0.8rem auto 1rem auto;
-  width: 190px;
-  height: 135px;
+.envelope-real-card {
+  width: 100%;
+  max-width: 230px;
+  height: 150px;
+  margin: 0.6rem auto;
   position: relative;
   cursor: pointer;
-  perspective: 800px;
+  perspective: 1000px;
 }
 
-.envelope-3d-paper {
+.envelope-real-body {
   width: 100%;
   height: 100%;
-  background: linear-gradient(145deg, #ffffff 0%, #fff2f5 100%);
-  border-radius: 12px;
+  background: linear-gradient(135deg, #ffa3b5 0%, #ff4770 100%);
+  border-radius: 16px;
   position: relative;
-  box-shadow: 0 14px 30px rgba(255, 71, 112, 0.22), 0 4px 10px rgba(0, 0, 0, 0.05);
-  border: 1px solid #ffe0e6;
+  box-shadow: 0 14px 32px rgba(255, 71, 112, 0.3), inset 0 2px 6px rgba(255, 255, 255, 0.4);
   overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
 }
 
-/* Solapa superior del sobre */
-.envelope-3d-topflap {
+.envelope-flap-top {
   position: absolute;
   top: 0;
   left: 0;
   width: 0;
   height: 0;
-  border-left: 95px solid transparent;
-  border-right: 95px solid transparent;
-  border-top: 72px solid #ff8aa3;
+  border-left: 115px solid transparent;
+  border-right: 115px solid transparent;
+  border-top: 80px solid #ff335e;
   transform-origin: top;
-  transition: transform 0.5s ease;
   z-index: 3;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
-/* Pliegues laterales del sobre */
-.envelope-3d-leftfold {
+.envelope-pocket-left {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 0;
   height: 0;
-  border-left: 95px solid #ffb3c1;
-  border-top: 67px solid transparent;
-  border-bottom: 67px solid #ffa3b5;
+  border-left: 115px solid #ff7b96;
+  border-top: 75px solid transparent;
+  border-bottom: 75px solid #ff6e8a;
   z-index: 2;
 }
 
-.envelope-3d-rightfold {
+.envelope-pocket-right {
   position: absolute;
   bottom: 0;
   right: 0;
   width: 0;
   height: 0;
-  border-right: 95px solid #ffb3c1;
-  border-top: 67px solid transparent;
-  border-bottom: 67px solid #ffa3b5;
+  border-right: 115px solid #ff7b96;
+  border-top: 75px solid transparent;
+  border-bottom: 75px solid #ff6e8a;
   z-index: 2;
 }
 
-.envelope-3d-bottomfold {
+.envelope-wax-stamp {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  border-left: 95px solid transparent;
-  border-right: 95px solid transparent;
-  border-bottom: 72px solid #ff6b8b;
-  z-index: 2;
-}
-
-/* Sello de Cera Dorado con Corazón Emboscado */
-.gold-wax-seal {
-  position: absolute;
-  top: 55px;
+  top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--gold-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(170, 130, 10, 0.45), inset 0 2px 4px rgba(255,255,255,0.6);
+  box-shadow: 0 6px 16px rgba(158, 121, 10, 0.4), inset 0 2px 4px rgba(255,255,255,0.7);
   z-index: 5;
-  border: 1.5px solid #fff5d6;
-  transition: transform 0.2s ease;
-}
-
-.gold-wax-seal:hover {
-  transform: translate(-50%, -50%) scale(1.1);
+  border: 2px solid #fff3d1;
 }
 
 /* Fondo de Chispas */
@@ -294,7 +283,7 @@ body {
 
 .floating-heart {
   position: absolute;
-  opacity: 0.18;
+  opacity: 0.15;
   animation: floatUp 12s infinite linear;
 }
 
@@ -303,8 +292,8 @@ body {
     transform: translateY(105vh) rotate(0deg) scale(0.6);
     opacity: 0;
   }
-  20% { opacity: 0.18; }
-  80% { opacity: 0.18; }
+  20% { opacity: 0.15; }
+  80% { opacity: 0.15; }
   100% {
     transform: translateY(-10vh) rotate(360deg) scale(0.85);
     opacity: 0;
@@ -315,7 +304,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 0.35rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
 }
 
 .dot-step {

@@ -7,48 +7,45 @@ const ProposalStep = ({ onAccept }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [noPosition, setNoPosition] = useState(null);
+  const cardRef = useRef(null);
   const yesBtnRef = useRef(null);
 
-  // Algoritmo de escape del botón NO estrictamente garantizado dentro del marco visible
+  // Esquivar manteniendo el botón NO 100% DENTRO de la tarjeta (Jamás desaparece de la pantalla)
   const dodgeNoButton = (e) => {
     if (e) {
       e.stopPropagation();
     }
-    const padding = 16;
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
+    const cardEl = cardRef.current;
+    const cardWidth = cardEl ? cardEl.offsetWidth : 320;
+    const cardHeight = cardEl ? cardEl.offsetHeight : 450;
 
-    const btnWidth = Math.min(170, screenWidth * 0.55);
-    const btnHeight = 44;
+    const btnWidth = 140;
+    const btnHeight = 42;
 
-    let yesBox = null;
-    if (yesBtnRef.current) {
-      yesBox = yesBtnRef.current.getBoundingClientRect();
-    }
+    const minX = 14;
+    const maxX = Math.max(minX, cardWidth - btnWidth - 14);
 
-    let newX = padding;
-    let newY = padding;
+    const minY = 70;
+    const maxY = Math.max(minY, cardHeight - btnHeight - 20);
+
+    let newX = minX;
+    let newY = minY;
     let isValid = false;
     let attempts = 0;
-
-    // Calculamos estrictamente dentro de los bordes del dispositivo
-    const minX = padding;
-    const maxX = Math.max(padding, screenWidth - btnWidth - padding);
-
-    const minY = 60; // Evitar la barra superior
-    const maxY = Math.max(minY, screenHeight - btnHeight - 60);
 
     while (!isValid && attempts < 50) {
       attempts++;
       newX = Math.floor(minX + Math.random() * (maxX - minX));
       newY = Math.floor(minY + Math.random() * (maxY - minY));
 
-      if (yesBox) {
-        const buffer = 45;
-        const overlapsX = newX + btnWidth >= yesBox.left - buffer && newX <= yesBox.right + buffer;
-        const overlapsY = newY + btnHeight >= yesBox.top - buffer && newY <= yesBox.bottom + buffer;
+      // Garantizar que no colisione con el botón SÍ
+      if (yesBtnRef.current) {
+        const yesRect = yesBtnRef.current.getBoundingClientRect();
+        const cardRect = cardEl.getBoundingClientRect();
+        const yesRelativeY = yesRect.top - cardRect.top;
 
-        if (!(overlapsX && overlapsY)) {
+        // Si está a más de 45px de distancia del botón SÍ en el eje Y, es válido
+        if (Math.abs(newY - yesRelativeY) > 45) {
           isValid = true;
         }
       } else {
@@ -61,10 +58,10 @@ const ProposalStep = ({ onAccept }) => {
   };
 
   return (
-    <div className="disney-card">
+    <div className="disney-card" ref={cardRef} style={{ position: 'relative' }}>
       <AnimatePresence mode="wait">
         {!isOpen ? (
-          /* ESTADO 1: SOBRE 3D ELEGANTE CON SELLO DE CERA DORADO 💌 */
+          /* ESTADO 1: SOBRE TIPO CARTA REALISTA CON SELLO DORADO 💌 */
           <motion.div
             key="envelope-view"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -72,32 +69,39 @@ const ProposalStep = ({ onAccept }) => {
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.35 }}
             onClick={() => setIsOpen(true)}
-            style={{ cursor: 'pointer', padding: '0.2rem 0' }}
+            style={{
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              height: '100%',
+              padding: '0.2rem 0'
+            }}
           >
-            <div className="getwell-badge">
-              <ThermometerSnowflake size={14} color="var(--primary-pink)" />
-              <span>{DATE_CONFIG.getWellBadge}</span>
+            <div>
+              <div className="getwell-badge">
+                <ThermometerSnowflake size={14} color="var(--primary-pink)" />
+                <span>{DATE_CONFIG.getWellBadge}</span>
+              </div>
+
+              <h2 className="letter-recipient-title">
+                {DATE_CONFIG.envelopeTitle}
+              </h2>
+              <p className="disney-subtitle">{DATE_CONFIG.envelopeSubtitle}</p>
             </div>
 
-            <h2 className="letter-recipient-title">
-              {DATE_CONFIG.envelopeTitle}
-            </h2>
-            <p className="disney-subtitle">{DATE_CONFIG.envelopeSubtitle}</p>
-
-            {/* Ilustración 3D de Carta Realista */}
+            {/* Ilustración 3D de Sobre Realista */}
             <motion.div
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
-              className="envelope-3d-container"
+              className="envelope-real-card"
             >
-              <div className="envelope-3d-paper">
-                <div className="envelope-3d-topflap"></div>
-                <div className="envelope-3d-leftfold"></div>
-                <div className="envelope-3d-rightfold"></div>
-                <div className="envelope-3d-bottomfold"></div>
-                {/* Sello de Cera Dorado con Corazón */}
-                <div className="gold-wax-seal">
-                  <Heart size={18} fill="#ffffff" color="#ffffff" className="pulse-heart" />
+              <div className="envelope-real-body">
+                <div className="envelope-flap-top"></div>
+                <div className="envelope-pocket-left"></div>
+                <div className="envelope-pocket-right"></div>
+                <div className="envelope-wax-stamp">
+                  <Heart size={20} fill="#ffffff" color="#ffffff" className="pulse-heart" />
                 </div>
               </div>
             </motion.div>
@@ -106,38 +110,46 @@ const ProposalStep = ({ onAccept }) => {
               animate={{ y: [0, 3, 0] }}
               transition={{ repeat: Infinity, duration: 1.8 }}
               className="btn-disney-primary"
-              style={{ marginTop: '0.9rem', width: '100%' }}
+              style={{ marginTop: '0.6rem', width: '100%' }}
             >
               <span>Abrir carta</span>
               <Sparkles size={16} />
             </motion.button>
           </motion.div>
         ) : (
-          /* ESTADO 2: PREGUNTA ORGÁNICA ✨ */
+          /* ESTADO 2: PREGUNTA PRINCIPAL ✨ */
           <motion.div
             key="proposal-view"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              height: '100%'
+            }}
           >
-            <div className="getwell-badge">
-              <ThermometerSnowflake size={14} />
-              <span>{DATE_CONFIG.getWellBadge}</span>
-            </div>
+            <div>
+              <div className="getwell-badge">
+                <ThermometerSnowflake size={14} />
+                <span>{DATE_CONFIG.getWellBadge}</span>
+              </div>
 
-            <h1 className="disney-title-serif">{DATE_CONFIG.proposalTitle}</h1>
-            <p className="disney-subtitle">{DATE_CONFIG.proposalSubtitle}</p>
+              <h1 className="disney-title-serif">{DATE_CONFIG.proposalTitle}</h1>
+              <p className="disney-subtitle">{DATE_CONFIG.proposalSubtitle}</p>
+            </div>
 
             {/* Corazón animado */}
             <motion.div
               animate={{ y: [0, -4, 0] }}
               transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
-              style={{ margin: '0.2rem 0 1rem 0', display: 'inline-block' }}
+              style={{ margin: '0.4rem 0', display: 'inline-block' }}
             >
               <div
                 style={{
-                  width: '68px',
-                  height: '68px',
+                  width: '74px',
+                  height: '74px',
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #ffd3e2 0%, #ff4770 100%)',
                   display: 'flex',
@@ -147,12 +159,12 @@ const ProposalStep = ({ onAccept }) => {
                   margin: '0 auto'
                 }}
               >
-                <Heart size={32} fill="#ffffff" color="#ffffff" className="pulse-heart" />
+                <Heart size={34} fill="#ffffff" color="#ffffff" className="pulse-heart" />
               </div>
             </motion.div>
 
             {/* Botones */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', width: '100%', position: 'relative' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
               <button
                 ref={yesBtnRef}
                 onClick={onAccept}
@@ -174,7 +186,7 @@ const ProposalStep = ({ onAccept }) => {
               )}
             </div>
 
-            {/* Botón NO esquivo que NUNCA desaparece de pantalla */}
+            {/* Botón NO escapando STRICTAMENTE dentro del contenedor de la tarjeta (Jamás desaparece) */}
             {noPosition && (
               <motion.button
                 onClick={dodgeNoButton}
@@ -183,12 +195,12 @@ const ProposalStep = ({ onAccept }) => {
                 className="btn-disney-secondary"
                 initial={false}
                 animate={{
-                  position: 'fixed',
+                  position: 'absolute',
                   left: `${noPosition.x}px`,
                   top: `${noPosition.y}px`,
-                  maxWidth: 'calc(100vw - 32px)',
+                  maxWidth: 'calc(100% - 28px)',
                   width: 'auto',
-                  zIndex: 99999,
+                  zIndex: 9999,
                   boxShadow: '0 8px 20px rgba(0,0,0,0.18)'
                 }}
                 transition={{ type: "spring", stiffness: 450, damping: 28 }}
