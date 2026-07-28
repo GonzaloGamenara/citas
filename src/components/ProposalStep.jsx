@@ -18,7 +18,7 @@ const ProposalStep = ({ onAccept }) => {
     const screenHeight = window.innerHeight;
 
     const btnWidth = Math.min(180, screenWidth * 0.6);
-    const btnHeight = 46;
+    const btnHeight = 44;
 
     let yesBox = null;
     if (yesBtnRef.current) {
@@ -36,7 +36,7 @@ const ProposalStep = ({ onAccept }) => {
       newY = Math.floor(padding + Math.random() * (screenHeight - btnHeight - padding * 2));
 
       if (yesBox) {
-        const buffer = 50;
+        const buffer = 45;
         const overlapsX = newX + btnWidth >= yesBox.left - buffer && newX <= yesBox.right + buffer;
         const overlapsY = newY + btnHeight >= yesBox.top - buffer && newY <= yesBox.bottom + buffer;
 
@@ -56,7 +56,7 @@ const ProposalStep = ({ onAccept }) => {
     <div className="disney-card">
       <AnimatePresence mode="wait">
         {!isOpen ? (
-          /* ESTADO 1: SOBRE CERRADO TIPO CARTA REAL PARA JULI 💌 */
+          /* ESTADO 1: SOBRE CERRADO CARTA 💌 */
           <motion.div
             key="envelope-view"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -64,17 +64,14 @@ const ProposalStep = ({ onAccept }) => {
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.35 }}
             onClick={() => setIsOpen(true)}
-            style={{ cursor: 'pointer', padding: '0.4rem 0' }}
+            style={{ cursor: 'pointer', padding: '0.2rem 0' }}
           >
-            <div className="vip-badge" style={{ background: '#fff0f3', borderColor: '#ffb3ba' }}>
+            <div className="getwell-badge">
               <ThermometerSnowflake size={14} color="var(--primary-pink)" />
               <span>{DATE_CONFIG.getWellBadge}</span>
             </div>
 
-            <h2
-              className="disney-title-accent"
-              style={{ fontSize: '2.6rem', marginTop: '0.4rem', marginBottom: '0.1rem', color: 'var(--primary-pink)' }}
-            >
+            <h2 className="letter-recipient-title">
               {DATE_CONFIG.envelopeTitle}
             </h2>
             <p className="disney-subtitle">{DATE_CONFIG.envelopeSubtitle}</p>
@@ -85,48 +82,34 @@ const ProposalStep = ({ onAccept }) => {
               className="envelope-wrapper"
             >
               <div className="envelope-body">
-                <Mail size={46} color="#ffffff" />
+                <Mail size={42} color="#ffffff" />
               </div>
               <div className="envelope-flap"></div>
               <div className="seal-heart">
-                <Heart size={20} fill="var(--primary-pink)" color="var(--primary-pink)" className="pulse-heart" />
+                <Heart size={18} fill="var(--primary-pink)" color="var(--primary-pink)" className="pulse-heart" />
               </div>
             </motion.div>
 
             <motion.button
-              animate={{ y: [0, 4, 0] }}
+              animate={{ y: [0, 3, 0] }}
               transition={{ repeat: Infinity, duration: 1.8 }}
               className="btn-disney-primary"
-              style={{ marginTop: '1.2rem', width: '100%' }}
+              style={{ marginTop: '1rem', width: '100%' }}
             >
               <span>Abrir carta</span>
-              <Sparkles size={18} />
+              <Sparkles size={16} />
             </motion.button>
           </motion.div>
         ) : (
-          /* ESTADO 2: PREGUNTA ORGÁNICA Y SIMPLE ✨ */
+          /* ESTADO 2: PREGUNTA PRINCIPAL ✨ */
           <motion.div
             key="proposal-view"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div
-              style={{
-                background: 'linear-gradient(135deg, #fff0f3 0%, #ffe4eb 100%)',
-                border: '1.5px solid #ffccd5',
-                borderRadius: '16px',
-                padding: '0.6rem 0.85rem',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                color: 'var(--primary-pink)',
-                marginBottom: '1.1rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem'
-              }}
-            >
-              <ThermometerSnowflake size={15} />
+            <div className="getwell-badge">
+              <ThermometerSnowflake size={14} />
               <span>{DATE_CONFIG.getWellBadge}</span>
             </div>
 
@@ -137,33 +120,33 @@ const ProposalStep = ({ onAccept }) => {
             <motion.div
               animate={{ y: [0, -4, 0] }}
               transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
-              style={{ margin: '0.4rem 0 1.2rem 0', display: 'inline-block' }}
+              style={{ margin: '0.2rem 0 1rem 0', display: 'inline-block' }}
             >
               <div
                 style={{
-                  width: '78px',
-                  height: '78px',
+                  width: '72px',
+                  height: '72px',
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #ffd3e2 0%, #ff4770 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 8px 20px rgba(255, 71, 112, 0.3)',
+                  boxShadow: '0 8px 18px rgba(255, 71, 112, 0.28)',
                   margin: '0 auto'
                 }}
               >
-                <Heart size={38} fill="#ffffff" color="#ffffff" className="pulse-heart" />
+                <Heart size={34} fill="#ffffff" color="#ffffff" className="pulse-heart" />
               </div>
             </motion.div>
 
             {/* Botones */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', position: 'relative' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', position: 'relative' }}>
               <button
                 ref={yesBtnRef}
                 onClick={onAccept}
                 className="btn-disney-primary"
               >
-                <Heart fill="white" size={18} />
+                <Heart fill="white" size={17} />
                 <span>¡SÍ, DE UNA! 💕</span>
               </button>
 

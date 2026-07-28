@@ -1,16 +1,17 @@
 /* =========================================================
-   ESTILOS DISNEY PASTEL REFINADOS & FONDO TRASERO ✨💌
+   DISEÑO UX/UI ULTRA-PREMIUM MOBILE FIRST ✨💌 2.0
    ========================================================= */
 
 :root {
-  --bg-gradient: linear-gradient(135deg, #ffd6e0 0%, #ffe8ee 35%, #fff5f8 70%, #f4e8f7 100%);
+  --bg-gradient: radial-gradient(circle at 50% 0%, #ffe3ec 0%, #fff0f5 45%, #f4e8f7 100%);
   --primary-pink: #ff4770;
-  --primary-hover: #ff2a5a;
+  --primary-hover: #e6325a;
+  --primary-light: #fff0f3;
   --gold-accent: #d4af37;
-  --card-bg: rgba(255, 255, 255, 0.96);
-  --card-shadow: 0 20px 45px rgba(255, 71, 112, 0.16), 0 4px 16px rgba(0, 0, 0, 0.04);
-  --text-main: #362229;
-  --text-muted: #735962;
+  --card-bg: rgba(255, 255, 255, 0.94);
+  --card-shadow: 0 16px 36px rgba(255, 71, 112, 0.14), 0 4px 16px rgba(0, 0, 0, 0.03);
+  --text-main: #2b1b22;
+  --text-muted: #6e5560;
   --font-serif: 'Playfair Display', serif;
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
@@ -29,28 +30,28 @@ html, body {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
-  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 body {
   font-family: var(--font-body);
   background: var(--bg-gradient);
   color: var(--text-main);
-  min-height: 100vh;
-  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
+  padding: 0;
 }
 
-/* Container Principal Mobile First */
+/* Container Principal Adaptable al Viewport del Móvil */
 .app-container {
   width: 100%;
-  max-width: 420px;
+  max-width: 410px;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 1.2rem 1rem;
+  padding: 1rem 0.85rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -60,13 +61,13 @@ body {
   overflow-x: hidden;
 }
 
-/* Tarjeta Principal Totalmente Opaca y al frente */
+/* Tarjeta Principal Glassmorphism Refinada */
 .disney-card {
   background: var(--card-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 30px;
-  padding: 2.2rem 1.4rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 26px;
+  padding: 1.6rem 1.25rem;
   box-shadow: var(--card-shadow);
   border: 1.5px solid rgba(255, 255, 255, 0.98);
   width: 100%;
@@ -75,70 +76,90 @@ body {
   position: relative;
   z-index: 20;
   box-sizing: border-box;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Tag / Badge */
-.vip-badge {
+/* Ocultar barra de scroll interna en la tarjeta para máxima elegancia */
+.disney-card::-webkit-scrollbar {
+  display: none;
+}
+
+/* Badge Tierno de Pronta Recuperación */
+.getwell-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
   background: linear-gradient(135deg, #fff0f3 0%, #ffe4eb 100%);
-  border: 1px solid rgba(255, 71, 112, 0.3);
-  padding: 0.35rem 0.9rem;
+  border: 1.5px solid #ffccd5;
+  padding: 0.4rem 0.95rem;
   border-radius: 50px;
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--primary-pink);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-bottom: 0.8rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(255, 71, 112, 0.08);
+  line-height: 1.2;
 }
 
-/* Tipografía Elegante Teatral */
+/* Tipografía de Carta Dedicada */
+.letter-recipient-title {
+  font-family: var(--font-accent);
+  font-size: 2.7rem;
+  font-weight: 700;
+  color: var(--primary-pink);
+  line-height: 1.1;
+  margin-top: 0.2rem;
+  margin-bottom: 0.1rem;
+  letter-spacing: -0.5px;
+}
+
 .disney-title-serif {
   font-family: var(--font-serif);
-  font-size: 1.75rem;
+  font-size: 1.55rem;
   font-weight: 700;
   color: var(--text-main);
-  line-height: 1.25;
-  margin-bottom: 0.4rem;
+  line-height: 1.28;
+  margin-bottom: 0.35rem;
   letter-spacing: -0.3px;
 }
 
 .disney-title-accent {
   font-family: var(--font-accent);
-  font-size: 2.3rem;
+  font-size: 2.1rem;
   color: var(--primary-pink);
-  line-height: 1.15;
-  margin-bottom: 0.2rem;
+  line-height: 1.1;
+  margin-bottom: 0.1rem;
   display: block;
 }
 
 .disney-subtitle {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
   font-weight: 500;
-  line-height: 1.45;
-  margin-bottom: 1.4rem;
+  line-height: 1.4;
+  margin-bottom: 1.2rem;
 }
 
 /* Botones Principales */
 .btn-disney-primary {
-  background: linear-gradient(135deg, #ff4770 0%, #ff6b8b 100%);
+  background: linear-gradient(135deg, #ff4770 0%, #ff6588 100%);
   color: white;
   font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-size: 1.08rem;
   font-weight: 700;
-  padding: 0.95rem 1.4rem;
+  padding: 0.88rem 1.3rem;
   border-radius: 50px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(255, 47, 90, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 8px 22px rgba(255, 71, 112, 0.32);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   width: 100%;
   max-width: 100%;
   outline: none;
@@ -146,46 +167,46 @@ body {
 }
 
 .btn-disney-primary:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .btn-disney-secondary {
   background: white;
   color: var(--primary-pink);
   font-family: var(--font-heading);
-  font-size: 0.98rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  padding: 0.78rem 1.2rem;
+  padding: 0.72rem 1.1rem;
   border-radius: 50px;
-  border: 2px solid #ffccd5;
+  border: 1.5px solid #ffccd5;
   cursor: pointer;
   transition: transform 0.15s ease;
   width: 100%;
   max-width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
   box-sizing: border-box;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ESTILOS SOBRE Y CARTA 💌 */
+/* ESTILOS SOBRE 3D ILUSTRADO 💌 */
 .envelope-wrapper {
   perspective: 1000px;
   cursor: pointer;
-  margin: 1.2rem auto 1rem auto;
-  width: 210px;
-  height: 140px;
+  margin: 1rem auto 0.8rem auto;
+  width: 195px;
+  height: 130px;
   position: relative;
 }
 
 .envelope-body {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #ff8da6 0%, #ff527b 100%);
+  background: linear-gradient(135deg, #ff7b99 0%, #ff4770 100%);
   border-radius: 16px;
   position: relative;
-  box-shadow: 0 12px 28px rgba(255, 71, 112, 0.35);
+  box-shadow: 0 12px 26px rgba(255, 71, 112, 0.32);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -197,9 +218,9 @@ body {
   left: 0;
   width: 0;
   height: 0;
-  border-left: 105px solid transparent;
-  border-right: 105px solid transparent;
-  border-top: 80px solid #ff3b68;
+  border-left: 97.5px solid transparent;
+  border-right: 97.5px solid transparent;
+  border-top: 75px solid #ff335e;
   transform-origin: top;
   transition: transform 0.6s ease-in-out;
   z-index: 3;
@@ -207,21 +228,21 @@ body {
 
 .seal-heart {
   position: absolute;
-  top: 60px;
+  top: 55px;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #fff0f3 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.16);
   z-index: 4;
 }
 
-/* FONDO DE PARTÍCULAS - UBICADO AL FONDO DETRÁS DE TODO (z-index: -1) */
+/* FONDO DE PARTÍCULAS SUTILES TRASERAS (z-index: 0) */
 .sparkle-bg {
   position: fixed;
   top: 0;
@@ -235,8 +256,8 @@ body {
 
 .floating-heart {
   position: absolute;
-  opacity: 0.22;
-  animation: floatUp 10s infinite linear;
+  opacity: 0.18;
+  animation: floatUp 12s infinite linear;
 }
 
 @keyframes floatUp {
@@ -244,10 +265,10 @@ body {
     transform: translateY(105vh) rotate(0deg) scale(0.6);
     opacity: 0;
   }
-  20% { opacity: 0.22; }
-  80% { opacity: 0.22; }
+  20% { opacity: 0.18; }
+  80% { opacity: 0.18; }
   100% {
-    transform: translateY(-10vh) rotate(360deg) scale(0.9);
+    transform: translateY(-10vh) rotate(360deg) scale(0.85);
     opacity: 0;
   }
 }
@@ -256,19 +277,19 @@ body {
   display: flex;
   justify-content: center;
   gap: 0.4rem;
-  margin-bottom: 1.1rem;
+  margin-bottom: 0.9rem;
 }
 
 .dot-step {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #ffd0dc;
   transition: all 0.3s ease;
 }
 
 .dot-step.active {
-  width: 24px;
+  width: 22px;
   border-radius: 12px;
   background: var(--primary-pink);
 }
