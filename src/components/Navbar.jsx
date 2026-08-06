@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, CalendarHeart, Bookmark, Flame, Sun, Smartphone } from 'lucide-react';
+import { Sparkles, CalendarHeart, Bookmark, Compass, Flame, Sun, Smartphone } from 'lucide-react';
 import { isRunningStandalone } from '../utils/pwaUtils';
 
 const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
@@ -49,7 +49,7 @@ const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
           )}
           <span className="nav-btn-content">
             <Sparkles size={14} />
-            <span>✨ Hoy</span>
+            <span>Hoy</span>
           </span>
         </button>
 
@@ -99,7 +99,8 @@ const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
             />
           )}
           <span className="nav-btn-content">
-            <span>🎡 CABA</span>
+            <Compass size={14} />
+            <span>CABA</span>
           </span>
         </button>
       </div>
