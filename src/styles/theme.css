@@ -36,6 +36,11 @@ html, body {
   min-height: 100dvh;
   background-color: #ffd6e0;
   transition: background 0.4s ease;
+  /* Evita el rebote de "pull to refresh" que en la PWA instalada revela el
+     fondo del sistema o dispara el gesto nativo por accidente. */
+  overscroll-behavior-y: contain;
+  /* Saca el delay de 300ms al tocar y evita el zoom por doble-tap accidental. */
+  touch-action: manipulation;
 }
 
 body {
@@ -116,8 +121,10 @@ body {
 /* La vela va POR DELANTE de la tarjeta (antes quedaba tapada) */
 .candle-graphic-wrapper {
   position: fixed;
-  bottom: 18px;
-  right: 18px;
+  /* + safe-area-inset-bottom: en la PWA instalada, que no quede pegada a la
+     barra del home indicator del iPhone. */
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  right: calc(18px + env(safe-area-inset-right));
   z-index: 900;
   pointer-events: none;
   display: flex;
@@ -560,7 +567,12 @@ body {
   max-width: 440px;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 1rem 0.8rem;
+  /* viewport-fit=cover deja que el contenido llegue hasta atrás del notch /
+     Dynamic Island y de la barra del home indicator cuando la PWA corre
+     instalada a pantalla completa (sin la UI de Safari de por medio). Sin
+     este padding, el contenido puede quedar tapado por esas zonas. */
+  padding: max(1rem, env(safe-area-inset-top)) max(0.8rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(0.8rem, env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -1871,6 +1883,7 @@ body {
 .caba-category-filter {
   flex-wrap: nowrap;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding-bottom: 4px;
 }
@@ -1898,7 +1911,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.8rem;
+  padding: max(0.8rem, env(safe-area-inset-top)) max(0.8rem, env(safe-area-inset-right))
+    max(0.8rem, env(safe-area-inset-bottom)) max(0.8rem, env(safe-area-inset-left));
   z-index: 1000;
   overflow-y: auto;
 }
@@ -1939,6 +1953,7 @@ body {
 
 .modal-close-btn {
   flex-shrink: 0;
+  position: relative;
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -1953,6 +1968,13 @@ body {
 }
 
 .modal-close-btn:active { transform: scale(0.9); }
+
+/* Área táctil real ~44px sin agrandar el botón visible */
+.modal-close-btn::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+}
 
 .modal-form,
 .detail-ticket-wrapper {
@@ -2008,7 +2030,9 @@ body {
 .form-textarea {
   width: 100%;
   font-family: var(--font-body);
-  font-size: 0.86rem;
+  /* 16px, no rem: por debajo de eso Safari en iOS hace zoom automático de
+     toda la página al tocar el campo — clásico bug de inputs chicos en PWA. */
+  font-size: 16px;
   color: var(--text-main);
   background: #fffafb;
   border: 1.5px solid #ffd6e0;
@@ -2124,6 +2148,7 @@ body {
   display: flex;
   gap: 0.3rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: 3px;
   scrollbar-width: none;
 }
@@ -2176,6 +2201,13 @@ body {
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 3px 8px rgba(255, 71, 112, 0.3);
+}
+
+/* Área táctil real ~44px sin agrandar el botón visible */
+.input-inline-btn::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 
 .autocomplete-dropdown {
@@ -2275,6 +2307,7 @@ body {
 
 .remove-tag-btn {
   flex-shrink: 0;
+  position: relative;
   width: 18px;
   height: 18px;
   border: none;
@@ -2285,6 +2318,14 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+/* Área táctil real ~34px sin agrandar el círculo visible (que a 44px se
+   vería enorme al lado de un chip chico). */
+.remove-tag-btn::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 
 /* =========================================================

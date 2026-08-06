@@ -80,7 +80,7 @@ const WishlistModule = ({ wishlist, onAddWish, onDeleteWish, onConvertToDate }) 
     >
       <div className="wishlist-header">
         <div>
-          <span className="disney-title-accent">Bucket List de Pareja</span>
+          <span className="disney-title-accent">Bucket List</span>
           <h2 className="disney-title-serif" style={{ margin: 0 }}>Lugares por Conocer 📝</h2>
         </div>
         <button

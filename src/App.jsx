@@ -56,6 +56,14 @@ const INITIAL_HISTORY_DATES = [
   }
 ];
 
+// v3/v2: antes de tener Supabase, estas claves guardaban directamente los
+// datos de ejemplo (sample-1/2, wish-1/2/3) como si fueran reales. Cualquier
+// dispositivo que haya abierto esa versión vieja los tiene cacheados acá. Se
+// suben de versión para que ese caché contaminado quede huérfano y se
+// ignore — el primer fetch a Supabase repuebla todo con los datos reales.
+const DATES_CACHE_KEY = 'citas_history_dates_v3';
+const WISHLIST_CACHE_KEY = 'citas_wishlist_v2';
+
 /**
  * Caché local de respaldo: sólo se usa para pintar algo instantáneo al abrir
  * la app (importante en la PWA, con conexión mala) y como red de contención
@@ -103,8 +111,8 @@ function App() {
     }
   }, [isCandleMode]);
 
-  const [historyDates, setHistoryDates] = useState(() => loadCache('citas_history_dates_v2'));
-  const [wishlist, setWishlist] = useState(() => loadCache('citas_wishlist_v1'));
+  const [historyDates, setHistoryDates] = useState(() => loadCache(DATES_CACHE_KEY));
+  const [wishlist, setWishlist] = useState(() => loadCache(WISHLIST_CACHE_KEY));
 
   // La pantalla "Hoy" (DailyCheckin) está desactivada por ahora — Home la
   // reemplaza en ese lugar del nav — pero se deja el fetch/realtime del
@@ -130,7 +138,7 @@ function App() {
     let cancelled = false;
 
     (async () => {
-      await migrateLocalDataIfNeeded(INITIAL_HISTORY_DATES, INITIAL_WISHLIST);
+      await migrateLocalDataIfNeeded();
 
       try {
         const [dates, wishes, mood] = await Promise.all([
@@ -143,8 +151,8 @@ function App() {
         setHistoryDates(dates);
         setWishlist(wishes);
         setTodayMood(mood);
-        saveCache('citas_history_dates_v2', dates);
-        saveCache('citas_wishlist_v1', wishes);
+        saveCache(DATES_CACHE_KEY, dates);
+        saveCache(WISHLIST_CACHE_KEY, wishes);
         setSyncState('live');
       } catch (e) {
         console.error('No se pudo conectar con Supabase, se muestra lo último guardado en este equipo:', e);
@@ -186,11 +194,11 @@ function App() {
 
   // Espejo en localStorage en cada cambio: sirve de caché offline-first para la PWA
   useEffect(() => {
-    saveCache('citas_history_dates_v2', historyDates);
+    saveCache(DATES_CACHE_KEY, historyDates);
   }, [historyDates]);
 
   useEffect(() => {
-    saveCache('citas_wishlist_v1', wishlist);
+    saveCache(WISHLIST_CACHE_KEY, wishlist);
   }, [wishlist]);
 
   const handleSaveHistoryDate = useCallback((newOrUpdatedDate) => {

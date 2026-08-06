@@ -134,6 +134,12 @@ const DateFormModal = ({ isOpen, onClose, onSave, initialData }) => {
     return () => clearTimeout(timer);
   }, [mediaQuery, mediaType]);
 
+  // El buscador de cine/teatro sólo tiene sentido si la cita incluye esa
+  // categoría — antes aparecía siempre, sin importar si era una merienda.
+  const showsCine = categories.includes('cine');
+  const showsTeatro = categories.includes('teatro');
+  const showMediaSearch = showsCine || showsTeatro;
+
   const toggleCategory = (catId) => {
     setCategories((prev) => {
       if (prev.includes(catId)) {
@@ -144,6 +150,13 @@ const DateFormModal = ({ isOpen, onClose, onSave, initialData }) => {
       }
     });
   };
+
+  // Si sólo una de las dos categorías está seleccionada, el toggle "Película
+  // / Teatro" arranca ya apuntando a la que corresponde.
+  useEffect(() => {
+    if (showsTeatro && !showsCine) setMediaType('theatre');
+    else if (showsCine && !showsTeatro) setMediaType('movie');
+  }, [showsCine, showsTeatro]);
 
   const addLocation = (locObj) => {
     const normalized = normalizeLocation(locObj);
@@ -447,124 +460,129 @@ const DateFormModal = ({ isOpen, onClose, onSave, initialData }) => {
               )}
             </div>
 
-            {/* BUSCADOR DE CINE Y TEATRO (CON AGREGADO MANUAL DIRECTO) */}
-            <div className="form-group" style={{ position: 'relative' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                <label className="form-label flex-align">
-                  🎬 Buscador de Película u Obra de Teatro
-                </label>
-                <div className="media-type-toggle">
-                  <button
-                    type="button"
-                    className={`toggle-btn ${mediaType === 'movie' ? 'active' : ''}`}
-                    onClick={() => setMediaType('movie')}
-                  >
-                    <Film size={12} /> Película
-                  </button>
-                  <button
-                    type="button"
-                    className={`toggle-btn ${mediaType === 'theatre' ? 'active' : ''}`}
-                    onClick={() => setMediaType('theatre')}
-                  >
-                    <Drama size={12} /> Teatro
-                  </button>
+            {/* BUSCADOR DE CINE Y TEATRO — sólo si la cita es de esa categoría */}
+            {showMediaSearch && (
+              <div className="form-group" style={{ position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                  <label className="form-label flex-align">
+                    🎬 Buscador de Película u Obra de Teatro
+                  </label>
+                  {/* El toggle sólo hace falta si eligieron las dos categorías a la vez */}
+                  {showsCine && showsTeatro && (
+                    <div className="media-type-toggle">
+                      <button
+                        type="button"
+                        className={`toggle-btn ${mediaType === 'movie' ? 'active' : ''}`}
+                        onClick={() => setMediaType('movie')}
+                      >
+                        <Film size={12} /> Película
+                      </button>
+                      <button
+                        type="button"
+                        className={`toggle-btn ${mediaType === 'theatre' ? 'active' : ''}`}
+                        onClick={() => setMediaType('theatre')}
+                      >
+                        <Drama size={12} /> Teatro
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              <div className="autocomplete-input-wrapper">
-                <input
-                  type="text"
-                  placeholder={mediaType === 'movie' ? 'Ej: Spiderman Brand New Day, Intensamente...' : 'Ej: Toc Toc, Obras de calle Corrientes...'}
-                  value={mediaQuery}
-                  onChange={(e) => setMediaQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addCustomMediaItem();
-                    }
-                  }}
-                  className="form-input"
-                />
+                <div className="autocomplete-input-wrapper">
+                  <input
+                    type="text"
+                    placeholder={mediaType === 'movie' ? 'Ej: Spiderman Brand New Day, Intensamente...' : 'Ej: Toc Toc, Obras de calle Corrientes...'}
+                    value={mediaQuery}
+                    onChange={(e) => setMediaQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addCustomMediaItem();
+                      }
+                    }}
+                    className="form-input"
+                  />
+                  {mediaQuery && (
+                    <button
+                      type="button"
+                      className="input-inline-btn"
+                      onClick={addCustomMediaItem}
+                      title="Agregar película u obra manual"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Sugerencias de Cine / Teatro */}
+                {mediaSuggestions.length > 0 && (
+                  <div className="autocomplete-dropdown media-dropdown">
+                    {mediaSuggestions.map((item) => (
+                      <div
+                        key={item.id}
+                        className="autocomplete-item media-item"
+                        onClick={() => addMediaItem(item)}
+                      >
+                        {item.poster ? (
+                          <img src={item.poster} alt={item.title} className="media-poster-thumb" />
+                        ) : (
+                          <div className="media-poster-placeholder">
+                            {item.type === 'movie' ? <Film size={16} /> : <Drama size={16} />}
+                          </div>
+                        )}
+                        <div>
+                          <div className="item-title">{item.title}</div>
+                          <div className="item-subtitle">
+                            {item.genre} {item.year ? `• ${item.year}` : ''}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Botón de Agregado Manual Siempre Disponible al Escribir */}
                 {mediaQuery && (
                   <button
                     type="button"
-                    className="input-inline-btn"
+                    className="custom-add-banner"
                     onClick={addCustomMediaItem}
-                    title="Agregar película u obra manual"
                   >
-                    <Plus size={16} />
+                    <Plus size={14} />
+                    <span>Agregar "<b>{mediaQuery}</b>" a la cita</span>
                   </button>
                 )}
+
+                {/* Tarjetas de Medios Adjuntos */}
+                {mediaItems.length > 0 && (
+                  <div className="added-media-stack">
+                    {mediaItems.map((m) => (
+                      <div key={m.id} className="added-media-card">
+                        {m.poster ? (
+                          <img src={m.poster} alt={m.title} className="media-card-poster" />
+                        ) : (
+                          <div className="media-card-icon-fallback">
+                            {m.type === 'movie' ? <Film size={18} /> : <Drama size={18} />}
+                          </div>
+                        )}
+                        <div className="media-card-info">
+                          <span className="media-card-badge">{m.type === 'movie' ? '🎬 Película' : '🎭 Teatro'}</span>
+                          <h5 className="media-card-title">{m.title}</h5>
+                          {m.genre && <span className="media-card-sub">{m.genre}</span>}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeMediaItem(m.id)}
+                          className="remove-tag-btn"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-
-              {/* Sugerencias de Cine / Teatro */}
-              {mediaSuggestions.length > 0 && (
-                <div className="autocomplete-dropdown media-dropdown">
-                  {mediaSuggestions.map((item) => (
-                    <div
-                      key={item.id}
-                      className="autocomplete-item media-item"
-                      onClick={() => addMediaItem(item)}
-                    >
-                      {item.poster ? (
-                        <img src={item.poster} alt={item.title} className="media-poster-thumb" />
-                      ) : (
-                        <div className="media-poster-placeholder">
-                          {item.type === 'movie' ? <Film size={16} /> : <Drama size={16} />}
-                        </div>
-                      )}
-                      <div>
-                        <div className="item-title">{item.title}</div>
-                        <div className="item-subtitle">
-                          {item.genre} {item.year ? `• ${item.year}` : ''}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Botón de Agregado Manual Siempre Disponible al Escribir */}
-              {mediaQuery && (
-                <button
-                  type="button"
-                  className="custom-add-banner"
-                  onClick={addCustomMediaItem}
-                >
-                  <Plus size={14} />
-                  <span>Agregar "<b>{mediaQuery}</b>" a la cita</span>
-                </button>
-              )}
-
-              {/* Tarjetas de Medios Adjuntos */}
-              {mediaItems.length > 0 && (
-                <div className="added-media-stack">
-                  {mediaItems.map((m) => (
-                    <div key={m.id} className="added-media-card">
-                      {m.poster ? (
-                        <img src={m.poster} alt={m.title} className="media-card-poster" />
-                      ) : (
-                        <div className="media-card-icon-fallback">
-                          {m.type === 'movie' ? <Film size={18} /> : <Drama size={18} />}
-                        </div>
-                      )}
-                      <div className="media-card-info">
-                        <span className="media-card-badge">{m.type === 'movie' ? '🎬 Película' : '🎭 Teatro'}</span>
-                        <h5 className="media-card-title">{m.title}</h5>
-                        {m.genre && <span className="media-card-sub">{m.genre}</span>}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeMediaItem(m.id)}
-                        className="remove-tag-btn"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
 
             {/* Notas y Recuerdos */}
             <div className="form-group">
