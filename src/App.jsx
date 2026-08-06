@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import BackgroundSparkles from './components/BackgroundSparkles';
 import Navbar from './components/Navbar';
-import DailyCheckin from './components/DailyCheckin';
+import Home from './components/Home';
 import HistoryModule from './components/HistoryModule';
 import WishlistModule, { INITIAL_WISHLIST } from './components/WishlistModule';
 import CabaEventsModule from './components/CabaEventsModule';
@@ -83,7 +83,7 @@ function saveCache(key, value) {
 }
 
 function App() {
-  const [activeTab, setActiveTab] = useState('today');
+  const [activeTab, setActiveTab] = useState('home');
 
   // El Modo Vela es una preferencia visual del dispositivo, no de la pareja:
   // cada uno puede tener su propio celular en modo día o modo noche.
@@ -105,6 +105,10 @@ function App() {
 
   const [historyDates, setHistoryDates] = useState(() => loadCache('citas_history_dates_v2'));
   const [wishlist, setWishlist] = useState(() => loadCache('citas_wishlist_v1'));
+
+  // La pantalla "Hoy" (DailyCheckin) está desactivada por ahora — Home la
+  // reemplaza en ese lugar del nav — pero se deja el fetch/realtime del
+  // ánimo del día andando para no perder la sincronización si se reactiva.
   const [todayMood, setTodayMood] = useState(null);
 
   // 'loading' mientras arranca | 'live' conectado y sincronizando | 'offline'
@@ -273,9 +277,7 @@ function App() {
       />
 
       <AnimatePresence mode="wait">
-        {activeTab === 'today' && (
-          <DailyCheckin key="today-tab" todayMood={todayMood} onSelectMood={handleSelectMood} />
-        )}
+        {activeTab === 'home' && <Home key="home-tab" onNavigate={setActiveTab} />}
 
         {activeTab === 'history' && (
           <HistoryModule

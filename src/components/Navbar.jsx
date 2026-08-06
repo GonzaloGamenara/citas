@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, CalendarHeart, Bookmark, Compass, Flame, Sun, Smartphone } from 'lucide-react';
+import { Home, CalendarHeart, Bookmark, Compass, Flame, Sun, Smartphone } from 'lucide-react';
 import { isRunningStandalone } from '../utils/pwaUtils';
 
 const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
@@ -37,10 +37,10 @@ const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
 
       <div className="nav-segmented-control multi-tabs">
         <button
-          onClick={() => setActiveTab('today')}
-          className={`nav-btn ${activeTab === 'today' ? 'active' : ''}`}
+          onClick={() => setActiveTab('home')}
+          className={`nav-btn ${activeTab === 'home' ? 'active' : ''}`}
         >
-          {activeTab === 'today' && (
+          {activeTab === 'home' && (
             <motion.div
               layoutId="activePill"
               className="nav-active-bg"
@@ -48,8 +48,8 @@ const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
             />
           )}
           <span className="nav-btn-content">
-            <Sparkles size={14} />
-            <span>Hoy</span>
+            <Home size={14} />
+            <span>Inicio</span>
           </span>
         </button>
 
