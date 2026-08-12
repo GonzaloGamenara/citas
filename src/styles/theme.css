@@ -561,10 +561,20 @@ body {
 .app-container.candle-mode-active .map-popup-date,
 .app-container.candle-mode-active .map-popup-notes { color: #f5d0e6 !important; }
 
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 /* Container Principal Móvil Centrado */
 .app-container {
   width: 100%;
   max-width: 440px;
+  margin: 0 auto;
   min-height: 100vh;
   min-height: 100dvh;
   /* viewport-fit=cover deja que el contenido llegue hasta atrás del notch /
@@ -1711,6 +1721,31 @@ body {
 
 .empty-emoji { font-size: 1.8rem; }
 
+.btn-edit-wish {
+  background: #fff0f4;
+  border: 1px solid #ffd6e0;
+  color: var(--pink-text);
+  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-edit-wish:hover {
+  background: #ffe4ec;
+  border-color: var(--primary-pink);
+}
+
+.editing-card {
+  border: 2px solid var(--primary-pink) !important;
+  background: #fff5f8 !important;
+}
+
 /* =========================================================
    MÓDULO CABA: PLANES CON INFO CONCRETA 🎡
    ========================================================= */
@@ -1913,7 +1948,7 @@ body {
   justify-content: center;
   padding: max(0.8rem, env(safe-area-inset-top)) max(0.8rem, env(safe-area-inset-right))
     max(0.8rem, env(safe-area-inset-bottom)) max(0.8rem, env(safe-area-inset-left));
-  z-index: 1000;
+  z-index: 9999;
   overflow-y: auto;
 }
 
@@ -2054,6 +2089,26 @@ body {
 .form-textarea:focus {
   border-color: var(--primary-pink);
   box-shadow: 0 0 0 3px rgba(255, 71, 112, 0.12);
+}
+
+input[type="date"].form-input {
+  height: 42px;
+  line-height: 1.2;
+  padding: 0.45rem 0.75rem;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+input[type="date"].form-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.3) sepia(1) saturate(5) hue-rotate(310deg);
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"].form-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 .form-input::placeholder,

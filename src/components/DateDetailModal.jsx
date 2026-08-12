@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Clock, MapPin, Hourglass, Film, Drama, Edit2, Trash2, ExternalLink } from 'lucide-react';
 
@@ -44,7 +45,7 @@ const DateDetailModal = ({ dateItem, onClose, onEdit, onDelete }) => {
     });
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {dateItem && (
       <motion.div
@@ -211,7 +212,8 @@ const DateDetailModal = ({ dateItem, onClose, onEdit, onDelete }) => {
         </motion.div>
       </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

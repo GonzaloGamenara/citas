@@ -234,6 +234,13 @@ function App() {
     }
   }, []);
 
+  const handleEditWish = useCallback((updatedWish) => {
+    setWishlist((prev) => prev.map((item) => (item.id === updatedWish.id ? updatedWish : item)));
+    if (isSupabaseConfigured) {
+      upsertWish(updatedWish).catch((e) => console.error('Error editando pendiente en Supabase:', e));
+    }
+  }, []);
+
   const handleConvertWishToDate = useCallback(
     (wishItem) => {
       const newDateItem = {
@@ -301,6 +308,7 @@ function App() {
             key="wishlist-tab"
             wishlist={wishlist}
             onAddWish={handleAddWish}
+            onEditWish={handleEditWish}
             onDeleteWish={handleDeleteWish}
             onConvertToDate={handleConvertWishToDate}
           />

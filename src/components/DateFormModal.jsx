@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Clock, MapPin, Hourglass, Film, Drama, Plus, Check, Sparkles, Map } from 'lucide-react';
 import { searchPlaces, searchMovies, searchTheatre } from '../services/apiService';
@@ -230,7 +231,7 @@ const DateFormModal = ({ isOpen, onClose, onSave, initialData }) => {
     onClose();
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
       <motion.div
@@ -609,7 +610,8 @@ const DateFormModal = ({ isOpen, onClose, onSave, initialData }) => {
         </motion.div>
       </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

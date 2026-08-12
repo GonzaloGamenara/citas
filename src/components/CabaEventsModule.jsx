@@ -3,23 +3,36 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import {
   Sparkles, MapPin, Plus, BookmarkCheck, ExternalLink, Map,
-  Wallet, Clock, CalendarCheck, Ticket, Lightbulb
+  Wallet, Clock, CalendarCheck, Ticket, Lightbulb, Search, X
 } from 'lucide-react';
 import { CABA_PLANS, PLAN_CATEGORIES, getMapsUrl } from '../data/cabaPlans';
 
 const CabaEventsModule = ({ onAddToWishlist }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlan, setSelectedPlan] = useState(CABA_PLANS[0]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [addedIds, setAddedIds] = useState([]);
   const spinIntervalRef = useRef(null);
 
-  const filteredPlans = useMemo(
-    () => (selectedCategory === 'all'
-      ? CABA_PLANS
-      : CABA_PLANS.filter((p) => p.category === selectedCategory)),
-    [selectedCategory]
-  );
+  const filteredPlans = useMemo(() => {
+    let list = CABA_PLANS;
+    if (selectedCategory !== 'all') {
+      list = list.filter((p) => p.category === selectedCategory);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.neighborhood.toLowerCase().includes(q) ||
+          p.address.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          (p.tip && p.tip.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [selectedCategory, searchQuery]);
 
   // Cuántos planes hay por categoría, para mostrarlo en los filtros
   const countsByCategory = useMemo(() => {
@@ -94,8 +107,31 @@ const CabaEventsModule = ({ onAddToWishlist }) => {
       <span className="disney-title-accent">Qué hacer en Buenos Aires</span>
       <h2 className="disney-title-serif">Agenda CABA 🎡</h2>
       <p className="disney-subtitle">
-        {CABA_PLANS.length} planes con dirección, precio y enlace al lugar
+        {CABA_PLANS.length} planes disponibles en CABA con mapa y detalles
       </p>
+
+      {/* Buscador Rápido por Texto */}
+      <div className="autocomplete-input-wrapper" style={{ marginBottom: '0.6rem' }}>
+        <input
+          type="text"
+          placeholder="🔍 Buscar por plan, barrio (Palermo, Recoleta...), comida, speakeasy..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="form-input"
+          style={{ paddingLeft: '2.2rem' }}
+        />
+        <Search size={16} className="icon-pink" style={{ position: 'absolute', left: '10px' }} />
+        {searchQuery && (
+          <button
+            type="button"
+            className="input-inline-btn"
+            onClick={() => setSearchQuery('')}
+            style={{ background: 'transparent', color: 'var(--text-muted)' }}
+          >
+            <X size={16} />
+          </button>
+        )}
+      </div>
 
       {/* Filtros por categoría */}
       <div className="caba-category-filter">

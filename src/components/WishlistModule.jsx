@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Plus, Trash2, MapPin, CheckCircle2, Bookmark } from 'lucide-react';
+import { Plus, Trash2, MapPin, CheckCircle2, Bookmark, Pencil, X, Sparkles } from 'lucide-react';
 
 const INITIAL_WISHLIST = [
   {
@@ -33,12 +33,33 @@ const INITIAL_WISHLIST = [
   }
 ];
 
-const WishlistModule = ({ wishlist, onAddWish, onDeleteWish, onConvertToDate }) => {
+const WishlistModule = ({ wishlist, onAddWish, onEditWish, onDeleteWish, onConvertToDate }) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+
+  // Form para agregar
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
   const [category, setCategory] = useState('cafe');
   const [notes, setNotes] = useState('');
+
+  // Form para editar
+  const [editTitle, setEditTitle] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [editCategory, setEditCategory] = useState('cafe');
+  const [editNotes, setEditNotes] = useState('');
+
+  const getEmojiForCategory = (cat) => {
+    switch (cat) {
+      case 'teatro': return '🎭';
+      case 'museo': return '🏛️';
+      case 'vino': return '🍷';
+      case 'cine': return '🎬';
+      case 'paseo': return '🌳';
+      case 'comida': return '🍕';
+      default: return '☕';
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -49,7 +70,7 @@ const WishlistModule = ({ wishlist, onAddWish, onDeleteWish, onConvertToDate }) 
       title: title.trim(),
       location: location.trim() || 'CABA',
       category: category,
-      emoji: category === 'teatro' ? '🎭' : category === 'museo' ? '🏛️' : category === 'vino' ? '🍷' : category === 'cine' ? '🎬' : '☕',
+      emoji: getEmojiForCategory(category),
       notes: notes.trim()
     });
 
@@ -57,6 +78,32 @@ const WishlistModule = ({ wishlist, onAddWish, onDeleteWish, onConvertToDate }) 
     setLocation('');
     setNotes('');
     setIsAdding(false);
+  };
+
+  const startEditing = (item) => {
+    setEditingItem(item);
+    setEditTitle(item.title || '');
+    setEditLocation(item.location || '');
+    setEditCategory(item.category || 'cafe');
+    setEditNotes(item.notes || '');
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (!editTitle.trim() || !editingItem) return;
+
+    if (onEditWish) {
+      onEditWish({
+        ...editingItem,
+        title: editTitle.trim(),
+        location: editLocation.trim() || 'CABA',
+        category: editCategory,
+        emoji: getEmojiForCategory(editCategory),
+        notes: editNotes.trim()
+      });
+    }
+
+    setEditingItem(null);
   };
 
   const handleCompleteItem = (item) => {
@@ -84,7 +131,10 @@ const WishlistModule = ({ wishlist, onAddWish, onDeleteWish, onConvertToDate }) 
           <h2 className="disney-title-serif" style={{ margin: 0 }}>Lugares por Conocer 📝</h2>
         </div>
         <button
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={() => {
+            setIsAdding(!isAdding);
+            setEditingItem(null);
+          }}
           className="btn-add-date"
         >
           <Plus size={16} />
@@ -174,46 +224,146 @@ const WishlistModule = ({ wishlist, onAddWish, onDeleteWish, onConvertToDate }) 
           </div>
         ) : (
           wishlist.map((item) => (
-            <motion.div
-              key={item.id}
-              whileHover={{ scale: 1.01 }}
-              className="wishlist-item-card"
-            >
-              <div className="wishlist-emoji-box">
-                {item.emoji || '📌'}
-              </div>
-
-              <div className="wishlist-item-info">
-                <h4 className="wishlist-item-title">{item.title}</h4>
-                {item.location && (
-                  <div className="wishlist-item-meta">
-                    <MapPin size={12} /> {item.location}
+            <React.Fragment key={item.id}>
+              {editingItem?.id === item.id ? (
+                <motion.form
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  onSubmit={handleSaveEdit}
+                  className="wishlist-form-card editing-card"
+                  style={{ marginBottom: '0.8rem' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h4 className="wishlist-form-title">✏️ Editar Pendiente</h4>
+                    <button
+                      type="button"
+                      onClick={() => setEditingItem(null)}
+                      className="modal-close-btn"
+                      style={{ width: 24, height: 24 }}
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
-                )}
-                {item.notes && (
-                  <p className="wishlist-item-notes">"{item.notes}"</p>
-                )}
-              </div>
 
-              <div className="wishlist-actions">
-                <button
-                  onClick={() => handleCompleteItem(item)}
-                  className="btn-mark-done"
-                  title="Marcar como realizado y mover a Nuestras Citas"
-                >
-                  <CheckCircle2 size={16} />
-                  <span>¡Ya fuimos!</span>
-                </button>
+                  <div className="form-group">
+                    <label className="form-label">Nombre del Lugar o Plan *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="form-input"
+                    />
+                  </div>
 
-                <button
-                  onClick={() => onDeleteWish(item.id)}
-                  className="btn-delete-wish"
-                  title="Eliminar de pendientes"
+                  <div className="form-row">
+                    <div className="form-group flex-1">
+                      <label className="form-label">Zona / Barrio</label>
+                      <input
+                        type="text"
+                        value={editLocation}
+                        onChange={(e) => setEditLocation(e.target.value)}
+                        className="form-input"
+                      />
+                    </div>
+
+                    <div className="form-group flex-1">
+                      <label className="form-label">Categoría</label>
+                      <select
+                        value={editCategory}
+                        onChange={(e) => setEditCategory(e.target.value)}
+                        className="form-input"
+                        style={{ background: 'white' }}
+                      >
+                        <option value="cafe">☕ Café / Merienda</option>
+                        <option value="teatro">🎭 Teatro / Show</option>
+                        <option value="museo">🏛️ Museo / Arte</option>
+                        <option value="vino">🍷 Vino / Bar</option>
+                        <option value="cine">🎬 Cine</option>
+                        <option value="paseo">🌳 Paseo / Plaza</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Detalles o Notas</label>
+                    <input
+                      type="text"
+                      value={editNotes}
+                      onChange={(e) => setEditNotes(e.target.value)}
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.4rem' }}>
+                    <button
+                      type="button"
+                      className="btn-disney-secondary"
+                      onClick={() => setEditingItem(null)}
+                      style={{ flex: 1, padding: '0.5rem' }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn-disney-primary"
+                      style={{ flex: 1, padding: '0.5rem' }}
+                    >
+                      <span>Guardar</span>
+                      <Sparkles size={14} />
+                    </button>
+                  </div>
+                </motion.form>
+              ) : (
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  className="wishlist-item-card"
                 >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </motion.div>
+                  <div className="wishlist-emoji-box">
+                    {item.emoji || '📌'}
+                  </div>
+
+                  <div className="wishlist-item-info">
+                    <h4 className="wishlist-item-title">{item.title}</h4>
+                    {item.location && (
+                      <div className="wishlist-item-meta">
+                        <MapPin size={12} /> {item.location}
+                      </div>
+                    )}
+                    {item.notes && (
+                      <p className="wishlist-item-notes">"{item.notes}"</p>
+                    )}
+                  </div>
+
+                  <div className="wishlist-actions">
+                    <button
+                      onClick={() => handleCompleteItem(item)}
+                      className="btn-mark-done"
+                      title="Marcar como realizado y mover a Nuestras Citas"
+                    >
+                      <CheckCircle2 size={16} />
+                      <span>¡Ya fuimos!</span>
+                    </button>
+
+                    <button
+                      onClick={() => startEditing(item)}
+                      className="btn-edit-wish"
+                      title="Editar este pendiente"
+                    >
+                      <Pencil size={14} />
+                    </button>
+
+                    <button
+                      onClick={() => onDeleteWish(item.id)}
+                      className="btn-delete-wish"
+                      title="Eliminar de pendientes"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </React.Fragment>
           ))
         )}
       </div>

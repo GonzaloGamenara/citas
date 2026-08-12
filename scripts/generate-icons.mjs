@@ -123,7 +123,7 @@ function drawIcon(size, heartScale) {
       for (const sy of [0.25, 0.75]) {
         for (const sx of [0.25, 0.75]) {
           const nx = (x + sx - size * 0.5) / unit;
-          const ny = -(y + sy - size * 0.46) / unit; // shift + flip: punta abajo
+          const ny = -(y + sy - size * 0.49) / unit; // shift + flip: punta abajo alineada y centrada exactamente
           if (insideHeart(nx, ny)) coverage += 0.25;
         }
       }
