@@ -2077,12 +2077,22 @@ body {
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
   user-select: text;
   -webkit-user-select: text;
+  box-sizing: border-box;
+}
+
+.form-input {
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  padding: 0 0.75rem;
+  line-height: 42px;
 }
 
 .form-textarea {
   resize: vertical;
   min-height: 70px;
   line-height: 1.4;
+  padding: 0.6rem 0.75rem;
 }
 
 .form-input:focus,
@@ -2091,13 +2101,31 @@ body {
   box-shadow: 0 0 0 3px rgba(255, 71, 112, 0.12);
 }
 
+/* Reset para iOS Safari / WebKit en inputs de fecha */
 input[type="date"].form-input {
-  height: 42px;
-  line-height: 1.2;
-  padding: 0.45rem 0.75rem;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  line-height: 42px !important;
+  padding: 0 0.75rem !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+/* Anular márgenes/alturas internas del Shadow DOM de iOS Safari */
+input[type="date"].form-input::-webkit-date-and-time-value {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  line-height: 42px !important;
+  text-align: left !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 input[type="date"].form-input::-webkit-calendar-picker-indicator {
