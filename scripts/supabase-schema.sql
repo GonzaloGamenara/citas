@@ -48,17 +48,34 @@ create table if not exists public.daily_moods (
 );
 
 -- ---------------------------------------------------------
+-- Tabla: estado del mazo de Cartas ("Desconectados")
+-- Una fila por carta, y sólo para las cartas que tienen algo que contar:
+-- si deja de estar vista y de ser favorita, la fila se borra.
+--
+-- Va al servidor y no a localStorage porque el mazo se juega de a dos: si el
+-- progreso fuera local, cada teléfono repetiría cartas que ya jugaron juntos
+-- y las favoritas de uno no las vería nunca el otro.
+-- ---------------------------------------------------------
+create table if not exists public.card_state (
+  card_id integer primary key,
+  is_favorite boolean not null default false,
+  seen boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------
 -- Row Level Security
 --
 -- La app no tiene login (es para 2 personas, con la key publishable
 -- embebida en el bundle). RLS acá NO restringe por usuario: sólo evita que,
--- por accidente o bug, alguien haga algo que no sea leer/escribir estas 3
+-- por accidente o bug, alguien haga algo que no sea leer/escribir estas 4
 -- tablas puntuales. La privacidad real depende de que la URL de la app y
 -- este proyecto de Supabase no se compartan públicamente.
 -- ---------------------------------------------------------
 alter table public.dates enable row level security;
 alter table public.wishlist enable row level security;
 alter table public.daily_moods enable row level security;
+alter table public.card_state enable row level security;
 
 drop policy if exists "acceso total dates" on public.dates;
 create policy "acceso total dates" on public.dates
@@ -72,15 +89,32 @@ drop policy if exists "acceso total daily_moods" on public.daily_moods;
 create policy "acceso total daily_moods" on public.daily_moods
   for all using (true) with check (true);
 
+drop policy if exists "acceso total card_state" on public.card_state;
+create policy "acceso total card_state" on public.card_state
+  for all using (true) with check (true);
+
 -- ---------------------------------------------------------
 -- Realtime: para que los cambios de un teléfono aparezcan solos en el otro
 -- ---------------------------------------------------------
-alter publication supabase_realtime add table public.dates;
-alter publication supabase_realtime add table public.wishlist;
-alter publication supabase_realtime add table public.daily_moods;
+-- `alter publication ... add table` explota si la tabla ya está publicada
+-- ("already member of publication"), así que este archivo se puede correr
+-- entero las veces que haga falta sin errores.
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['dates', 'wishlist', 'daily_moods', 'card_state'] loop
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t
+    ) then
+      execute format('alter publication supabase_realtime add table public.%I', t);
+    end if;
+  end loop;
+end $$;
 
 -- ---------------------------------------------------------
--- updated_at automático en `dates` cuando se edita una cita
+-- updated_at automático al editar una fila
 -- ---------------------------------------------------------
 create or replace function public.set_updated_at()
 returns trigger
@@ -95,4 +129,9 @@ $$;
 drop trigger if exists dates_set_updated_at on public.dates;
 create trigger dates_set_updated_at
   before update on public.dates
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists card_state_set_updated_at on public.card_state;
+create trigger card_state_set_updated_at
+  before update on public.card_state
   for each row execute function public.set_updated_at();

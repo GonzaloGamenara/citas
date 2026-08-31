@@ -5,7 +5,7 @@ import Navbar from './components/Navbar';
 import Home from './components/Home';
 import HistoryModule from './components/HistoryModule';
 import WishlistModule, { INITIAL_WISHLIST } from './components/WishlistModule';
-import CabaEventsModule from './components/CabaEventsModule';
+import CardsModule from './components/CardsModule';
 import CandleOverlay from './components/CandleOverlay';
 import InstallPwaGuide from './components/InstallPwaGuide';
 import { getTodayLocalISO } from './utils/dateUtils';
@@ -314,14 +314,8 @@ function App() {
           />
         )}
 
-        {activeTab === 'caba' && (
-          <CabaEventsModule
-            key="caba-tab"
-            onAddToWishlist={(newWish) => {
-              handleAddWish(newWish);
-              setActiveTab('wishlist');
-            }}
-          />
+        {activeTab === 'cards' && (
+          <CardsModule key="cards-tab" />
         )}
       </AnimatePresence>
     </main>

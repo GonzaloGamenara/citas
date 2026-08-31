@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Home, CalendarHeart, Bookmark, Compass, Flame, Sun, Smartphone } from 'lucide-react';
+import { Home, CalendarHeart, Bookmark, HelpCircle, Flame, Sun, Smartphone } from 'lucide-react';
 import { isRunningStandalone } from '../utils/pwaUtils';
 
 const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
@@ -88,10 +88,10 @@ const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
         </button>
 
         <button
-          onClick={() => setActiveTab('caba')}
-          className={`nav-btn ${activeTab === 'caba' ? 'active' : ''}`}
+          onClick={() => setActiveTab('cards')}
+          className={`nav-btn ${activeTab === 'cards' ? 'active' : ''}`}
         >
-          {activeTab === 'caba' && (
+          {activeTab === 'cards' && (
             <motion.div
               layoutId="activePill"
               className="nav-active-bg"
@@ -99,8 +99,8 @@ const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
             />
           )}
           <span className="nav-btn-content">
-            <Compass size={14} />
-            <span>CABA</span>
+            <HelpCircle size={14} />
+            <span>Cartas</span>
           </span>
         </button>
       </div>

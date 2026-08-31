@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarHeart, Bookmark, Compass, ChevronRight } from 'lucide-react';
+import { CalendarHeart, Bookmark, HelpCircle, ChevronRight } from 'lucide-react';
+import { UNLOCKED_STORAGE_KEY } from './CardsModule';
 
 // Accesos rápidos a las otras 3 secciones: cada una con un ícono + una línea
 // que explica qué hay adentro, sin vueltas.
@@ -18,12 +19,25 @@ const SECTIONS = [
     description: 'Lo que quedó anotado para hacer en algún momento.'
   },
   {
-    tab: 'caba',
-    icon: Compass,
-    title: 'CABA',
-    description: 'Ideas para cuando no sabemos qué hacer.'
+    tab: 'cards',
+    icon: HelpCircle,
+    title: '¿?',
+    description: 'Una sorpresa secreta para descubrir.'
   }
 ];
+
+/**
+ * Una vez que el mazo se desbloqueó, seguir diciendo "sorpresa secreta" es
+ * raro: ya lo abrieron. A partir de ahí la tarjeta dice lo que realmente es.
+ */
+function unlockedCardsSection() {
+  return {
+    tab: 'cards',
+    icon: HelpCircle,
+    title: 'Cartas',
+    description: 'Preguntas para jugar de a dos y conocernos un poco más.'
+  };
+}
 
 /**
  * Reemplaza temporalmente a DailyCheckin como pantalla de entrada. El
@@ -31,6 +45,18 @@ const SECTIONS = [
  * por si se retoma más adelante.
  */
 const Home = ({ onNavigate }) => {
+  const sections = useMemo(() => {
+    let isUnlocked = false;
+    try {
+      isUnlocked = localStorage.getItem(UNLOCKED_STORAGE_KEY) === '1';
+    } catch {
+      /* sin localStorage se mantiene el texto de sorpresa */
+    }
+    return isUnlocked
+      ? SECTIONS.map((section) => (section.tab === 'cards' ? unlockedCardsSection() : section))
+      : SECTIONS;
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -52,7 +78,7 @@ const Home = ({ onNavigate }) => {
       </p>
 
       <div className="home-sections-stack">
-        {SECTIONS.map(({ tab, icon: Icon, title, description }) => (
+        {sections.map(({ tab, icon: Icon, title, description }) => (
           <button
             key={tab}
             type="button"
