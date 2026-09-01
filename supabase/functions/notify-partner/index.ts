@@ -8,9 +8,14 @@
  * privada VAPID, que no puede vivir en el bundle del navegador. Además, el
  * teléfono del que recibe puede estar cerrado — justamente por eso hay push.
  *
- * Secrets necesarios (supabase secrets set ...):
- *   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT
+ * Secrets necesarios (Dashboard → Edge Functions → Secrets):
+ *   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT, NOTIFY_SECRET
  * SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY los inyecta Supabase solo.
+ *
+ * La función se despliega sin verificación de JWT (el trigger de Postgres no
+ * tiene un token de usuario que mandar), así que se protege con NOTIFY_SECRET:
+ * sin ese header no se manda ninguna notificación. Si no estuviera, cualquiera
+ * que descubriera la URL podría meterles avisos falsos en el teléfono.
  */
 import webpush from 'npm:web-push@3.6.7';
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -18,6 +23,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY') ?? '';
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY') ?? '';
 const VAPID_SUBJECT = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:gonzagamenara@gmail.com';
+const NOTIFY_SECRET = Deno.env.get('NOTIFY_SECRET') ?? '';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -59,6 +65,11 @@ function buildMessage(table: string, row: Record<string, unknown>) {
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
+  }
+
+  // Sólo el trigger de la base conoce este secreto.
+  if (!NOTIFY_SECRET || req.headers.get('x-notify-secret') !== NOTIFY_SECRET) {
+    return new Response(JSON.stringify({ error: 'no autorizado' }), { status: 401 });
   }
 
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {

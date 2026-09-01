@@ -170,52 +170,33 @@ create trigger card_state_set_updated_at
 -- =========================================================
 -- NOTIFICACIONES: conectar los INSERT con la Edge Function
 --
--- Lo más simple es hacerlo desde el Dashboard:
---   Database → Webhooks → Create a new hook
---   · Tabla: dates    | Evento: Insert | Tipo: Supabase Edge Functions
---   · Tabla: wishlist | Evento: Insert | Tipo: Supabase Edge Functions
---   · Función: notify-partner
--- El Dashboard se encarga solo de la autenticación, así que no hay que
--- guardar ninguna key en este archivo.
+-- El trigger llama a la función `notify-partner`, que es la que firma y manda
+-- el push. Va con pg_net y un header secreto compartido en vez de un JWT,
+-- porque un trigger de Postgres no tiene token de usuario que mandar.
 --
--- Si preferís hacerlo por SQL, descomentá lo de abajo DESPUÉS de correr una
--- sola vez (con tu propia anon key, que así no queda versionada acá):
+-- El SQL con los valores reales se genera aparte (PASO-4-triggers.sql.local,
+-- ignorado por git) para no versionar el secreto. Acá queda la forma:
 --
---   alter database postgres set app.settings.notify_url =
---     'https://TU-PROYECTO.supabase.co/functions/v1/notify-partner';
---   alter database postgres set app.settings.notify_key = 'TU_ANON_KEY';
+--   create extension if not exists pg_net;
+--
+--   create or replace function public.notify_partner_on_insert()
+--   returns trigger language plpgsql security definer as $$
+--   begin
+--     perform net.http_post(
+--       url := 'https://TU-PROYECTO.supabase.co/functions/v1/notify-partner',
+--       headers := jsonb_build_object(
+--         'Content-Type', 'application/json',
+--         'x-notify-secret', 'EL_MISMO_VALOR_QUE_NOTIFY_SECRET'
+--       ),
+--       body := jsonb_build_object(
+--         'type', 'INSERT', 'table', TG_TABLE_NAME, 'record', to_jsonb(NEW)
+--       )
+--     );
+--     return NEW;
+--   end; $$;
+--
+--   create trigger dates_notify_partner after insert on public.dates
+--     for each row execute function public.notify_partner_on_insert();
+--   create trigger wishlist_notify_partner after insert on public.wishlist
+--     for each row execute function public.notify_partner_on_insert();
 -- =========================================================
-
--- create extension if not exists pg_net with schema extensions;
---
--- create or replace function public.notify_partner_on_insert()
--- returns trigger
--- language plpgsql
--- security definer
--- as $$
--- begin
---   perform net.http_post(
---     url := current_setting('app.settings.notify_url', true),
---     headers := jsonb_build_object(
---       'Content-Type', 'application/json',
---       'Authorization', 'Bearer ' || current_setting('app.settings.notify_key', true)
---     ),
---     body := jsonb_build_object(
---       'type', 'INSERT',
---       'table', TG_TABLE_NAME,
---       'record', to_jsonb(NEW)
---     )
---   );
---   return NEW;
--- end;
--- $$;
---
--- drop trigger if exists dates_notify_partner on public.dates;
--- create trigger dates_notify_partner
---   after insert on public.dates
---   for each row execute function public.notify_partner_on_insert();
---
--- drop trigger if exists wishlist_notify_partner on public.wishlist;
--- create trigger wishlist_notify_partner
---   after insert on public.wishlist
---   for each row execute function public.notify_partner_on_insert();
