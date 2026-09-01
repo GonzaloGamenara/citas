@@ -19,7 +19,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
-
-/** true si las env vars están cargadas: útil para mostrar un estado de error claro en vez de fallos silenciosos */
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+
+export const supabase = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;

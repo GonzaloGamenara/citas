@@ -5,9 +5,12 @@ import Navbar from './components/Navbar';
 import Home from './components/Home';
 import HistoryModule from './components/HistoryModule';
 import WishlistModule, { INITIAL_WISHLIST } from './components/WishlistModule';
-import CabaEventsModule from './components/CabaEventsModule';
+import CardsModule from './components/CardsModule';
 import CandleOverlay from './components/CandleOverlay';
 import InstallPwaGuide from './components/InstallPwaGuide';
+import IdentityGate from './components/IdentityGate';
+import { loadIdentity, saveIdentity } from './utils/identity';
+import { clearBadge } from './utils/push';
 import { getTodayLocalISO } from './utils/dateUtils';
 import { isSupabaseConfigured } from './services/supabaseClient';
 import { fetchDates, upsertDate, deleteDate, subscribeToDates } from './services/datesService';
@@ -93,6 +96,15 @@ function saveCache(key, value) {
 function App() {
   const [activeTab, setActiveTab] = useState('home');
 
+  // Quién está usando este teléfono. Se pregunta una sola vez por dispositivo;
+  // hace falta para saber a quién avisarle cuando el otro agrega algo.
+  const [identity, setIdentity] = useState(loadIdentity);
+
+  const handleChooseIdentity = useCallback((personId) => {
+    saveIdentity(personId);
+    setIdentity(personId);
+  }, []);
+
   // El Modo Vela es una preferencia visual del dispositivo, no de la pareja:
   // cada uno puede tener su propio celular en modo día o modo noche.
   const [isCandleMode, setIsCandleMode] = useState(() => {
@@ -125,6 +137,17 @@ function App() {
   const [syncState, setSyncState] = useState('loading');
 
   const todayISO = getTodayLocalISO();
+
+  // Volver a la app cuenta como "ya lo vi": se apaga el puntito del ícono y
+  // se cierran los avisos que quedaron en la bandeja.
+  useEffect(() => {
+    const handleVisible = () => {
+      if (document.visibilityState === 'visible') clearBadge();
+    };
+    handleVisible();
+    document.addEventListener('visibilitychange', handleVisible);
+    return () => document.removeEventListener('visibilitychange', handleVisible);
+  }, []);
 
   // Carga inicial: migración (si hace falta) + primer fetch de las 3 fuentes
   useEffect(() => {
@@ -201,17 +224,28 @@ function App() {
     saveCache(WISHLIST_CACHE_KEY, wishlist);
   }, [wishlist]);
 
-  const handleSaveHistoryDate = useCallback((newOrUpdatedDate) => {
-    setHistoryDates((prev) => {
-      const exists = prev.some((item) => item.id === newOrUpdatedDate.id);
-      return exists
-        ? prev.map((item) => (item.id === newOrUpdatedDate.id ? newOrUpdatedDate : item))
-        : [newOrUpdatedDate, ...prev];
-    });
-    if (isSupabaseConfigured) {
-      upsertDate(newOrUpdatedDate).catch((e) => console.error('Error guardando cita en Supabase:', e));
-    }
-  }, []);
+  const handleSaveHistoryDate = useCallback(
+    (newOrUpdatedDate) => {
+      // Sólo se firma al crear: editar una cita del otro no cambia de autor
+      // (y tampoco dispara notificación, porque el upsert termina en UPDATE).
+      let toSave = newOrUpdatedDate;
+
+      setHistoryDates((prev) => {
+        const existing = prev.find((item) => item.id === newOrUpdatedDate.id);
+        if (existing) {
+          toSave = { ...newOrUpdatedDate, createdBy: existing.createdBy || null };
+          return prev.map((item) => (item.id === newOrUpdatedDate.id ? toSave : item));
+        }
+        toSave = { ...newOrUpdatedDate, createdBy: identity };
+        return [toSave, ...prev];
+      });
+
+      if (isSupabaseConfigured) {
+        upsertDate(toSave).catch((e) => console.error('Error guardando cita en Supabase:', e));
+      }
+    },
+    [identity]
+  );
 
   const handleDeleteHistoryDate = useCallback((idToDelete) => {
     setHistoryDates((prev) => prev.filter((item) => item.id !== idToDelete));
@@ -220,12 +254,18 @@ function App() {
     }
   }, []);
 
-  const handleAddWish = useCallback((newWish) => {
-    setWishlist((prev) => [newWish, ...prev]);
-    if (isSupabaseConfigured) {
-      upsertWish(newWish).catch((e) => console.error('Error guardando pendiente en Supabase:', e));
-    }
-  }, []);
+  const handleAddWish = useCallback(
+    (newWish) => {
+      const wishWithAuthor = { ...newWish, createdBy: identity };
+      setWishlist((prev) => [wishWithAuthor, ...prev]);
+      if (isSupabaseConfigured) {
+        upsertWish(wishWithAuthor).catch((e) =>
+          console.error('Error guardando pendiente en Supabase:', e)
+        );
+      }
+    },
+    [identity]
+  );
 
   const handleDeleteWish = useCallback((idToDelete) => {
     setWishlist((prev) => prev.filter((item) => item.id !== idToDelete));
@@ -235,9 +275,16 @@ function App() {
   }, []);
 
   const handleEditWish = useCallback((updatedWish) => {
-    setWishlist((prev) => prev.map((item) => (item.id === updatedWish.id ? updatedWish : item)));
+    let toSave = updatedWish;
+    setWishlist((prev) =>
+      prev.map((item) => {
+        if (item.id !== updatedWish.id) return item;
+        toSave = { ...updatedWish, createdBy: item.createdBy || null };
+        return toSave;
+      })
+    );
     if (isSupabaseConfigured) {
-      upsertWish(updatedWish).catch((e) => console.error('Error editando pendiente en Supabase:', e));
+      upsertWish(toSave).catch((e) => console.error('Error editando pendiente en Supabase:', e));
     }
   }, []);
 
@@ -252,14 +299,15 @@ function App() {
         categories: [wishItem.category || 'cafe'],
         locations: [{ name: wishItem.location || 'CABA' }],
         mediaItems: [],
-        notes: wishItem.notes || '¡Pendiente cumplido y disfrutado juntos!'
+        notes: wishItem.notes || '¡Pendiente cumplido y disfrutado juntos!',
+        createdBy: identity
       };
 
       handleSaveHistoryDate(newDateItem);
       handleDeleteWish(wishItem.id);
       setActiveTab('history');
     },
-    [handleSaveHistoryDate, handleDeleteWish]
+    [handleSaveHistoryDate, handleDeleteWish, identity]
   );
 
   const handleSelectMood = useCallback(
@@ -271,6 +319,18 @@ function App() {
     },
     [todayISO]
   );
+
+  // Dispositivo nuevo: primero hay que saber quién lo está usando. Sin esto
+  // las notificaciones no sabrían a quién avisarle.
+  if (!identity) {
+    return (
+      <main className={`app-container ${isCandleMode ? 'candle-mode-active' : ''}`}>
+        <BackgroundSparkles />
+        <CandleOverlay isCandleMode={isCandleMode} />
+        <IdentityGate onChoose={handleChooseIdentity} />
+      </main>
+    );
+  }
 
   return (
     <main className={`app-container ${isCandleMode ? 'candle-mode-active' : ''}`}>
@@ -289,10 +349,14 @@ function App() {
         setActiveTab={setActiveTab}
         isCandleMode={isCandleMode}
         setIsCandleMode={setIsCandleMode}
+        identity={identity}
+        onSwitchIdentity={handleChooseIdentity}
       />
 
       <AnimatePresence mode="wait">
-        {activeTab === 'home' && <Home key="home-tab" onNavigate={setActiveTab} />}
+        {activeTab === 'home' && (
+          <Home key="home-tab" onNavigate={setActiveTab} identity={identity} />
+        )}
 
         {activeTab === 'history' && (
           <HistoryModule
@@ -314,14 +378,8 @@ function App() {
           />
         )}
 
-        {activeTab === 'caba' && (
-          <CabaEventsModule
-            key="caba-tab"
-            onAddToWishlist={(newWish) => {
-              handleAddWish(newWish);
-              setActiveTab('wishlist');
-            }}
-          />
+        {activeTab === 'cards' && (
+          <CardsModule key="cards-tab" />
         )}
       </AnimatePresence>
     </main>

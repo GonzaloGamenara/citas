@@ -9,7 +9,8 @@ function fromRow(row) {
     location: row.location || '',
     category: row.category || 'cafe',
     emoji: row.emoji || '📌',
-    notes: row.notes || ''
+    notes: row.notes || '',
+    createdBy: row.created_by || null
   };
 }
 
@@ -20,7 +21,9 @@ function toRow(item) {
     location: item.location || null,
     category: item.category || null,
     emoji: item.emoji || null,
-    notes: item.notes || null
+    notes: item.notes || null,
+    // Quién lo agregó: lo usa la notificación para avisarle al otro.
+    created_by: item.createdBy || null
   };
 }
 

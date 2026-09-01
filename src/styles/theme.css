@@ -3163,3 +3163,955 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover {
 .app-container.candle-mode-active .home-section-arrow {
   color: #f5d0e6 !important;
 }
+
+/* =========================================================
+   MÓDULO DE CARTAS ROMÁNTICAS "GONZA & JULI" 🎴✨
+   ========================================================= */
+
+.romantic-card-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 410px;
+  margin: 0 auto;
+  padding: 10px 16px 24px;
+  gap: 16px;
+}
+
+/* Escenario del mazo */
+.romantic-card-stack-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.7 / 3.9;
+  /* La carta se lleva todo el alto que sobra, pero nunca tanto como para
+     empujar los controles fuera de la vista: en un iPhone SE (667px) el
+     botón "Siguiente" — que en este juego se toca todo el tiempo — tiene que
+     quedar siempre a mano. */
+  min-height: clamp(300px, 46vh, 520px);
+  max-height: min(560px, 62vh);
+  max-height: min(560px, 62dvh);
+  margin-top: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Capas traseras del mazo (Efecto Stack Realista) */
+.romantic-card-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1.5px solid rgba(255, 71, 112, 0.18);
+  box-shadow: 0 12px 32px rgba(255, 71, 112, 0.08);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.romantic-card-layer.layer-1 {
+  transform: rotate(2.8deg) scale(0.985);
+  opacity: 0.88;
+  background: #fffdfd;
+  z-index: 1;
+}
+
+.romantic-card-layer.layer-2 {
+  transform: rotate(-2.4deg) scale(0.965);
+  opacity: 0.65;
+  background: #fff8f9;
+  z-index: 0;
+}
+
+.romantic-card-layer.layer-3 {
+  transform: rotate(1.2deg) scale(0.945);
+  opacity: 0.42;
+  background: #fff3f5;
+  z-index: 0;
+}
+
+/* Carta Física Activa */
+.romantic-card {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1.5px solid rgba(255, 71, 112, 0.22);
+  box-shadow: 0 20px 50px rgba(255, 71, 112, 0.13), 0 6px 18px rgba(0, 0, 0, 0.04);
+  padding: 14px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: pan-y;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.romantic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 64px rgba(255, 71, 112, 0.18), 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+.romantic-card:active {
+  cursor: grabbing;
+}
+
+/* Marco Interno Editorial de Lujo */
+.romantic-card-inner-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 71, 112, 0.16);
+  padding: 24px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: radial-gradient(circle at 50% 15%, #ffffff 0%, #fffbfd 100%);
+  position: relative;
+}
+
+/* Encabezado */
+.romantic-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.romantic-card-brand {
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--pink-text);
+  text-transform: uppercase;
+}
+
+.romantic-card-top-spark,
+.romantic-card-footer-spark {
+  color: #ff8da1;
+  font-size: 0.75rem;
+}
+
+/* Cuerpo con Pregunta */
+.romantic-card-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 8px;
+  text-align: center;
+}
+
+.romantic-card-question {
+  font-family: var(--font-serif);
+  font-size: clamp(1.05rem, 4.4vw, 1.34rem);
+  line-height: 1.5;
+  color: var(--text-main);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  max-width: 320px;
+}
+
+/* Pie */
+.romantic-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-bottom: 2px;
+}
+
+.romantic-card-footer-tag {
+  font-family: var(--font-heading);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--pink-text);
+  opacity: 0.85;
+}
+
+/* Estado Vacío */
+.romantic-card.empty-deck-card {
+  text-align: center;
+}
+
+.romantic-card-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 12px auto 0;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--primary-pink);
+  color: #ffffff;
+  border: none;
+  font-family: var(--font-heading);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(255, 71, 112, 0.35);
+}
+
+/* Barra de Controles Flotante */
+.romantic-card-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 32px rgba(255, 71, 112, 0.12), 0 2px 8px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.romantic-control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.romantic-control-btn.icon-only {
+  padding: 9px 10px;
+}
+
+.romantic-control-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.romantic-control-btn:hover:not(:disabled) {
+  background: rgba(255, 71, 112, 0.08);
+  color: var(--primary-pink);
+  transform: translateY(-1px);
+}
+
+.romantic-control-btn.shuffle {
+  color: var(--text-muted);
+}
+
+.romantic-control-btn.favorite {
+  padding: 9px 11px;
+  color: var(--text-muted);
+}
+
+.romantic-control-btn.favorite.active {
+  color: #ff4770;
+}
+
+.romantic-control-btn.primary {
+  background: var(--primary-pink);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(255, 71, 112, 0.35);
+  padding: 9px 16px;
+}
+
+.romantic-control-btn.primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 71, 112, 0.45);
+}
+
+/* Indicador de Favoritas */
+.romantic-favorites-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid rgba(255, 71, 112, 0.2);
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.romantic-favorites-pill:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--primary-pink);
+}
+
+.romantic-favorites-pill.active {
+  background: #fff0f3;
+  color: var(--primary-pink);
+  border-color: rgba(255, 71, 112, 0.35);
+}
+
+/* =========================================================
+   OVERRIDE MODO VELA ROMÁNTICO 🕯️ PARA CARTAS
+   ========================================================= */
+
+.app-container.candle-mode-active .romantic-card-layer {
+  background: rgba(22, 10, 30, 0.92);
+  border-color: rgba(255, 71, 112, 0.24);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+
+.app-container.candle-mode-active .romantic-card-layer.layer-1 {
+  background: rgba(26, 12, 36, 0.94);
+}
+
+.app-container.candle-mode-active .romantic-card-layer.layer-2 {
+  background: rgba(20, 8, 28, 0.88);
+}
+
+.app-container.candle-mode-active .romantic-card-layer.layer-3 {
+  background: rgba(16, 6, 24, 0.78);
+}
+
+.app-container.candle-mode-active .romantic-card {
+  background: rgba(30, 14, 42, 0.98);
+  border-color: rgba(255, 71, 112, 0.35);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 28px rgba(255, 71, 112, 0.12);
+}
+
+.app-container.candle-mode-active .romantic-card-inner-frame {
+  border-color: rgba(255, 71, 112, 0.24);
+  background: radial-gradient(circle at 50% 15%, rgba(42, 18, 58, 0.9) 0%, rgba(26, 10, 36, 0.95) 100%);
+}
+
+.app-container.candle-mode-active .romantic-card-brand {
+  color: #f472b6;
+}
+
+.app-container.candle-mode-active .romantic-card-question {
+  color: #fdf2f8;
+}
+
+.app-container.candle-mode-active .romantic-card-footer-tag {
+  color: #f9a8d4;
+}
+
+.app-container.candle-mode-active .romantic-card-controls {
+  background: rgba(36, 16, 50, 0.9);
+  border-color: rgba(255, 71, 112, 0.32);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+}
+
+.app-container.candle-mode-active .romantic-control-btn {
+  color: #fdf2f8;
+}
+
+.app-container.candle-mode-active .romantic-control-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.app-container.candle-mode-active .romantic-control-btn.primary {
+  background: var(--primary-pink);
+  color: #ffffff;
+}
+
+.app-container.candle-mode-active .romantic-favorites-pill {
+  color: #f5d0e6;
+  border-color: rgba(255, 71, 112, 0.3);
+  background: rgba(36, 16, 50, 0.65);
+}
+
+.app-container.candle-mode-active .romantic-favorites-pill:hover {
+  background: rgba(58, 24, 76, 0.85);
+  color: #f9a8d4;
+}
+
+.app-container.candle-mode-active .romantic-favorites-pill.active {
+  background: rgba(90, 20, 50, 0.85);
+  color: #ff4770;
+  border-color: #ff4770;
+}
+
+/* =========================================================
+   PANTALLA "ES SORPRESA" 🤫🔒
+   ========================================================= */
+
+.romantic-card.unlock-card {
+  cursor: default;
+}
+
+.romantic-card.unlock-card:hover {
+  transform: none;
+  box-shadow: 0 20px 50px rgba(255, 71, 112, 0.13), 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.unlock-card.shake-error {
+  animation: unlockShake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes unlockShake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+  40%, 60% { transform: translate3d(6px, 0, 0); }
+}
+
+.unlock-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px 8px;
+  gap: 10px;
+}
+
+.unlock-icon-wrapper {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  border: 1.5px solid rgba(255, 71, 112, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+  box-shadow: 0 8px 20px rgba(255, 71, 112, 0.14);
+}
+
+.lock-icon-pulse {
+  animation: lockPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes lockPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.unlock-icon-anim {
+  animation: unlockPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes unlockPop {
+  0% { transform: scale(0.6) rotate(-15deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.unlock-title {
+  font-family: var(--font-serif);
+  font-size: 1.38rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.unlock-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  max-width: 290px;
+}
+
+.unlock-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 270px;
+  margin-top: 6px;
+}
+
+.unlock-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.unlock-input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--pink-text);
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.unlock-pin-input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255, 71, 112, 0.25);
+  background: #ffffff;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-align: center;
+  color: var(--text-main);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.unlock-pin-input:focus {
+  border-color: var(--primary-pink);
+  box-shadow: 0 0 0 3px rgba(255, 71, 112, 0.18);
+}
+
+.unlock-pin-input.input-error {
+  border-color: #ef4444;
+  color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+}
+
+.unlock-error-msg {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #e11d48;
+  line-height: 1.35;
+}
+
+.unlock-submit-btn {
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 16px;
+  background: var(--primary-pink);
+  color: #ffffff;
+  border: none;
+  font-family: var(--font-heading);
+  font-size: 0.94rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(255, 71, 112, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.unlock-submit-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(255, 71, 112, 0.45);
+}
+
+.unlock-submit-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Modo Vela en Pantalla Es Sorpresa */
+.app-container.candle-mode-active .unlock-icon-wrapper {
+  background: rgba(58, 24, 76, 0.9);
+  border-color: rgba(255, 71, 112, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.app-container.candle-mode-active .unlock-title {
+  color: #fdf2f8;
+}
+
+.app-container.candle-mode-active .unlock-desc {
+  color: #f5d0e6;
+}
+
+.app-container.candle-mode-active .unlock-pin-input {
+  background: rgba(42, 18, 58, 0.9);
+  border-color: rgba(255, 71, 112, 0.35);
+  color: #ffffff;
+}
+
+.app-container.candle-mode-active .unlock-pin-input:focus {
+  border-color: var(--primary-pink);
+  box-shadow: 0 0 0 3px rgba(255, 71, 112, 0.3);
+}
+
+.app-container.candle-mode-active .unlock-error-msg {
+  color: #fb7185;
+}
+
+/* =========================================================
+   CARTAS: FILTRO POR TONO, TURNO Y PROGRESO DEL MAZO
+   ========================================================= */
+
+/* Sólo para lectores de pantalla (etiquetas y anuncios de la carta viva) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.romantic-card-turn {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--pink-text);
+  cursor: pointer;
+}
+
+.romantic-card-turn:hover {
+  opacity: 0.72;
+}
+
+.cards-whisper-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-family: var(--font-heading);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.cards-whisper-count {
+  opacity: 0.75;
+}
+
+.cards-whisper-btn {
+  background: transparent;
+  border: none;
+  padding: 2px 0;
+  font: inherit;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(255, 71, 112, 0.35);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.cards-whisper-btn:hover,
+.cards-whisper-btn.active {
+  color: var(--pink-text);
+}
+
+.empty-deck-note {
+  margin-top: 10px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.cards-sync-note {
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  text-align: center;
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* Modo Vela */
+.app-container.candle-mode-active .empty-deck-note,
+.app-container.candle-mode-active .cards-sync-note,
+.app-container.candle-mode-active .cards-whisper-count {
+  color: #f5d0e6;
+}
+
+.app-container.candle-mode-active .cards-whisper-btn {
+  color: #f5d0e6;
+}
+
+.app-container.candle-mode-active .cards-whisper-btn:hover,
+.app-container.candle-mode-active .cards-whisper-btn.active {
+  color: #f9a8d4;
+}
+
+.app-container.candle-mode-active .romantic-card-turn {
+  color: #f9a8d4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .romantic-card,
+  .romantic-card-layer {
+    transition: none !important;
+  }
+}
+
+/* Pantallas angostas: el mazo tiene que entrar sin empujar los controles */
+@media (max-width: 360px) {
+  .romantic-card-scene {
+    gap: 10px;
+    padding: 8px 12px 24px;
+  }
+
+  .romantic-card-inner-frame {
+    padding: 18px 14px 14px;
+  }
+
+  .romantic-control-btn {
+    padding: 9px 11px;
+    font-size: 0.82rem;
+  }
+}
+
+/* =========================================================
+   ¿QUIÉN SOS? — se pregunta una sola vez por dispositivo
+   ========================================================= */
+
+.identity-gate {
+  text-align: center;
+}
+
+.identity-gate-desc {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin: 6px auto 22px;
+  max-width: 300px;
+}
+
+.identity-gate-options {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.identity-gate-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 120px;
+  max-width: 160px;
+  padding: 22px 16px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 71, 112, 0.22);
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.identity-gate-btn:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary-pink);
+  box-shadow: 0 12px 28px rgba(255, 71, 112, 0.18);
+}
+
+.identity-gate-emoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.identity-gate-name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--pink-text);
+}
+
+/* Pastilla de "estás como X" en la barra superior */
+.identity-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 71, 112, 0.2);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--pink-text);
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.identity-pill:hover {
+  background: #ffffff;
+  border-color: rgba(255, 71, 112, 0.4);
+}
+
+/* Modo Vela */
+.app-container.candle-mode-active .identity-gate-desc {
+  color: #f5d0e6;
+}
+
+.app-container.candle-mode-active .identity-gate-btn {
+  background: rgba(36, 16, 50, 0.72);
+  border-color: rgba(255, 71, 112, 0.3);
+}
+
+.app-container.candle-mode-active .identity-gate-btn:hover {
+  border-color: var(--primary-pink);
+}
+
+.app-container.candle-mode-active .identity-gate-name {
+  color: #f9a8d4;
+}
+
+.app-container.candle-mode-active .identity-pill {
+  background: rgba(36, 16, 50, 0.8);
+  border-color: rgba(255, 71, 112, 0.3);
+  color: #f9a8d4;
+}
+
+.app-container.candle-mode-active .identity-pill:hover {
+  background: rgba(58, 24, 76, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .identity-gate-btn {
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   AVISOS DEL OTRO (Web Push)
+   ========================================================= */
+
+.notif-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 71, 112, 0.16);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.notif-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  color: var(--pink-text);
+}
+
+.notif-card-icon.active {
+  background: var(--primary-pink);
+  color: #ffffff;
+}
+
+.notif-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.notif-card-title {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.notif-card-desc {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.notif-card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  min-width: 40px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: none;
+  background: var(--primary-pink);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 71, 112, 0.3);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.notif-card-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.notif-card-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.notif-card-btn.is-on {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 71, 112, 0.25);
+  box-shadow: none;
+}
+
+/* Variante "todavía no se puede": iOS sin instalar */
+.notif-card-hint {
+  background: rgba(255, 255, 255, 0.45);
+  border-style: dashed;
+}
+
+/* Modo Vela */
+.app-container.candle-mode-active .notif-card {
+  background: rgba(36, 16, 50, 0.6);
+  border-color: rgba(255, 71, 112, 0.26);
+}
+
+.app-container.candle-mode-active .notif-card-icon {
+  background: rgba(255, 71, 112, 0.18);
+  color: #f9a8d4;
+}
+
+.app-container.candle-mode-active .notif-card-icon.active {
+  background: var(--primary-pink);
+  color: #ffffff;
+}
+
+.app-container.candle-mode-active .notif-card-title {
+  color: #fdf2f8;
+}
+
+.app-container.candle-mode-active .notif-card-desc {
+  color: #f5d0e6;
+}
+
+.app-container.candle-mode-active .notif-card-btn.is-on {
+  color: #f5d0e6;
+  border-color: rgba(255, 71, 112, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notif-card-btn {
+    transition: none !important;
+  }
+}
