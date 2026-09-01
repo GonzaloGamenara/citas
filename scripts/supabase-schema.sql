@@ -48,6 +48,32 @@ create table if not exists public.daily_moods (
 );
 
 -- ---------------------------------------------------------
+-- Quién agregó cada cosa.
+--
+-- Sin esto no se puede notificar: la notificación tiene que ir al OTRO, no a
+-- quien acaba de escribir. `alter table ... add column if not exists` hace
+-- que esto funcione tanto en una base nueva como en una que ya tenía datos.
+-- ---------------------------------------------------------
+alter table public.dates add column if not exists created_by text;
+alter table public.wishlist add column if not exists created_by text;
+
+-- ---------------------------------------------------------
+-- Tabla: a qué dispositivos mandarle notificaciones
+-- Una fila por navegador/dispositivo. Si alguien tiene la app en el iPhone y
+-- en un iPad, son dos filas con el mismo user_key.
+-- ---------------------------------------------------------
+create table if not exists public.push_subscriptions (
+  endpoint text primary key,
+  user_key text not null,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists push_subscriptions_user_key_idx
+  on public.push_subscriptions (user_key);
+
+-- ---------------------------------------------------------
 -- Tabla: estado del mazo de Cartas ("Desconectados")
 -- Una fila por carta, y sólo para las cartas que tienen algo que contar:
 -- si deja de estar vista y de ser favorita, la fila se borra.
@@ -68,7 +94,7 @@ create table if not exists public.card_state (
 --
 -- La app no tiene login (es para 2 personas, con la key publishable
 -- embebida en el bundle). RLS acá NO restringe por usuario: sólo evita que,
--- por accidente o bug, alguien haga algo que no sea leer/escribir estas 4
+-- por accidente o bug, alguien haga algo que no sea leer/escribir estas 5
 -- tablas puntuales. La privacidad real depende de que la URL de la app y
 -- este proyecto de Supabase no se compartan públicamente.
 -- ---------------------------------------------------------
@@ -76,6 +102,7 @@ alter table public.dates enable row level security;
 alter table public.wishlist enable row level security;
 alter table public.daily_moods enable row level security;
 alter table public.card_state enable row level security;
+alter table public.push_subscriptions enable row level security;
 
 drop policy if exists "acceso total dates" on public.dates;
 create policy "acceso total dates" on public.dates
@@ -91,6 +118,10 @@ create policy "acceso total daily_moods" on public.daily_moods
 
 drop policy if exists "acceso total card_state" on public.card_state;
 create policy "acceso total card_state" on public.card_state
+  for all using (true) with check (true);
+
+drop policy if exists "acceso total push_subscriptions" on public.push_subscriptions;
+create policy "acceso total push_subscriptions" on public.push_subscriptions
   for all using (true) with check (true);
 
 -- ---------------------------------------------------------
@@ -135,3 +166,56 @@ drop trigger if exists card_state_set_updated_at on public.card_state;
 create trigger card_state_set_updated_at
   before update on public.card_state
   for each row execute function public.set_updated_at();
+
+-- =========================================================
+-- NOTIFICACIONES: conectar los INSERT con la Edge Function
+--
+-- Lo más simple es hacerlo desde el Dashboard:
+--   Database → Webhooks → Create a new hook
+--   · Tabla: dates    | Evento: Insert | Tipo: Supabase Edge Functions
+--   · Tabla: wishlist | Evento: Insert | Tipo: Supabase Edge Functions
+--   · Función: notify-partner
+-- El Dashboard se encarga solo de la autenticación, así que no hay que
+-- guardar ninguna key en este archivo.
+--
+-- Si preferís hacerlo por SQL, descomentá lo de abajo DESPUÉS de correr una
+-- sola vez (con tu propia anon key, que así no queda versionada acá):
+--
+--   alter database postgres set app.settings.notify_url =
+--     'https://TU-PROYECTO.supabase.co/functions/v1/notify-partner';
+--   alter database postgres set app.settings.notify_key = 'TU_ANON_KEY';
+-- =========================================================
+
+-- create extension if not exists pg_net with schema extensions;
+--
+-- create or replace function public.notify_partner_on_insert()
+-- returns trigger
+-- language plpgsql
+-- security definer
+-- as $$
+-- begin
+--   perform net.http_post(
+--     url := current_setting('app.settings.notify_url', true),
+--     headers := jsonb_build_object(
+--       'Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || current_setting('app.settings.notify_key', true)
+--     ),
+--     body := jsonb_build_object(
+--       'type', 'INSERT',
+--       'table', TG_TABLE_NAME,
+--       'record', to_jsonb(NEW)
+--     )
+--   );
+--   return NEW;
+-- end;
+-- $$;
+--
+-- drop trigger if exists dates_notify_partner on public.dates;
+-- create trigger dates_notify_partner
+--   after insert on public.dates
+--   for each row execute function public.notify_partner_on_insert();
+--
+-- drop trigger if exists wishlist_notify_partner on public.wishlist;
+-- create trigger wishlist_notify_partner
+--   after insert on public.wishlist
+--   for each row execute function public.notify_partner_on_insert();

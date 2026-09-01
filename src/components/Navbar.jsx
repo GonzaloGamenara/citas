@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Home, CalendarHeart, Bookmark, HelpCircle, Flame, Sun, Smartphone } from 'lucide-react';
 import { isRunningStandalone } from '../utils/pwaUtils';
+import { PEOPLE, partnerOf } from '../utils/identity';
 
-const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
+const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode, identity, onSwitchIdentity }) => {
+  const me = PEOPLE.find((p) => p.id === identity);
+  const other = PEOPLE.find((p) => p.id === partnerOf(identity));
   // No tiene sentido ofrecer "instalar" si ya se está usando la app instalada
   const [showInstallButton, setShowInstallButton] = useState(false);
   useEffect(() => {
@@ -13,6 +16,19 @@ const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
   return (
     <div className="app-nav-container">
       <div className="theme-toggle-wrapper">
+        {/* Escape hatch: si alguien tocó el nombre equivocado al entrar, acá
+            lo cambia sin tener que reinstalar la app. */}
+        {me && other && (
+          <button
+            onClick={() => onSwitchIdentity(other.id)}
+            className="identity-pill"
+            title={`Estás como ${me.name} — tocá para cambiar a ${other.name}`}
+          >
+            <span aria-hidden="true">{me.emoji}</span>
+            <span>{me.name}</span>
+          </button>
+        )}
+
         {showInstallButton && (
           <button
             onClick={() => window.dispatchEvent(new Event('open-pwa-guide'))}
@@ -100,7 +116,7 @@ const Navbar = ({ activeTab, setActiveTab, isCandleMode, setIsCandleMode }) => {
           )}
           <span className="nav-btn-content">
             <HelpCircle size={14} />
-            <span>Cartas</span>
+            <span>Secreto</span>
           </span>
         </button>
       </div>

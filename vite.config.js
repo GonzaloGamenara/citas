@@ -28,6 +28,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,woff2,png,svg}'],
+        // Los handlers de Web Push viven aparte (public/push-sw.js) para no
+        // tener que reescribir a mano toda esta config de caché con
+        // injectManifest. Workbox sigue generando el SW; esto sólo le suma
+        // las notificaciones.
+        importScripts: ['/push-sw.js'],
         runtimeCaching: [
           {
             // Datos de la pareja: siempre en vivo, nunca servidos desde caché

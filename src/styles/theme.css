@@ -3868,3 +3868,250 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover {
     font-size: 0.82rem;
   }
 }
+
+/* =========================================================
+   ¿QUIÉN SOS? — se pregunta una sola vez por dispositivo
+   ========================================================= */
+
+.identity-gate {
+  text-align: center;
+}
+
+.identity-gate-desc {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin: 6px auto 22px;
+  max-width: 300px;
+}
+
+.identity-gate-options {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.identity-gate-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 120px;
+  max-width: 160px;
+  padding: 22px 16px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 71, 112, 0.22);
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.identity-gate-btn:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary-pink);
+  box-shadow: 0 12px 28px rgba(255, 71, 112, 0.18);
+}
+
+.identity-gate-emoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.identity-gate-name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--pink-text);
+}
+
+/* Pastilla de "estás como X" en la barra superior */
+.identity-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 71, 112, 0.2);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--pink-text);
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.identity-pill:hover {
+  background: #ffffff;
+  border-color: rgba(255, 71, 112, 0.4);
+}
+
+/* Modo Vela */
+.app-container.candle-mode-active .identity-gate-desc {
+  color: #f5d0e6;
+}
+
+.app-container.candle-mode-active .identity-gate-btn {
+  background: rgba(36, 16, 50, 0.72);
+  border-color: rgba(255, 71, 112, 0.3);
+}
+
+.app-container.candle-mode-active .identity-gate-btn:hover {
+  border-color: var(--primary-pink);
+}
+
+.app-container.candle-mode-active .identity-gate-name {
+  color: #f9a8d4;
+}
+
+.app-container.candle-mode-active .identity-pill {
+  background: rgba(36, 16, 50, 0.8);
+  border-color: rgba(255, 71, 112, 0.3);
+  color: #f9a8d4;
+}
+
+.app-container.candle-mode-active .identity-pill:hover {
+  background: rgba(58, 24, 76, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .identity-gate-btn {
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   AVISOS DEL OTRO (Web Push)
+   ========================================================= */
+
+.notif-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 71, 112, 0.16);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.notif-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  color: var(--pink-text);
+}
+
+.notif-card-icon.active {
+  background: var(--primary-pink);
+  color: #ffffff;
+}
+
+.notif-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.notif-card-title {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.notif-card-desc {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.notif-card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  min-width: 40px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: none;
+  background: var(--primary-pink);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 71, 112, 0.3);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.notif-card-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.notif-card-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.notif-card-btn.is-on {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 71, 112, 0.25);
+  box-shadow: none;
+}
+
+/* Variante "todavía no se puede": iOS sin instalar */
+.notif-card-hint {
+  background: rgba(255, 255, 255, 0.45);
+  border-style: dashed;
+}
+
+/* Modo Vela */
+.app-container.candle-mode-active .notif-card {
+  background: rgba(36, 16, 50, 0.6);
+  border-color: rgba(255, 71, 112, 0.26);
+}
+
+.app-container.candle-mode-active .notif-card-icon {
+  background: rgba(255, 71, 112, 0.18);
+  color: #f9a8d4;
+}
+
+.app-container.candle-mode-active .notif-card-icon.active {
+  background: var(--primary-pink);
+  color: #ffffff;
+}
+
+.app-container.candle-mode-active .notif-card-title {
+  color: #fdf2f8;
+}
+
+.app-container.candle-mode-active .notif-card-desc {
+  color: #f5d0e6;
+}
+
+.app-container.candle-mode-active .notif-card-btn.is-on {
+  color: #f5d0e6;
+  border-color: rgba(255, 71, 112, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notif-card-btn {
+    transition: none !important;
+  }
+}

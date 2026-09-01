@@ -13,7 +13,8 @@ function fromRow(row) {
     categories: row.categories || [],
     locations: row.locations || [],
     mediaItems: row.media_items || [],
-    notes: row.notes || ''
+    notes: row.notes || '',
+    createdBy: row.created_by || null
   };
 }
 
@@ -27,7 +28,10 @@ function toRow(item) {
     categories: item.categories || [],
     locations: item.locations || [],
     media_items: item.mediaItems || [],
-    notes: item.notes || null
+    notes: item.notes || null,
+    // Quién la agregó: lo usa la notificación para avisarle al otro y no a
+    // quien acaba de escribir.
+    created_by: item.createdBy || null
   };
 }
 

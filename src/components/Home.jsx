@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarHeart, Bookmark, HelpCircle, ChevronRight } from 'lucide-react';
 import { UNLOCKED_STORAGE_KEY } from './CardsModule';
+import NotificationsCard from './NotificationsCard';
 
 // Accesos rápidos a las otras 3 secciones: cada una con un ícono + una línea
 // que explica qué hay adentro, sin vueltas.
@@ -21,20 +22,21 @@ const SECTIONS = [
   {
     tab: 'cards',
     icon: HelpCircle,
-    title: '¿?',
-    description: 'Una sorpresa secreta para descubrir.'
+    title: 'Secreto',
+    description: 'Una sorpresa para descubrir.'
   }
 ];
 
 /**
- * Una vez que el mazo se desbloqueó, seguir diciendo "sorpresa secreta" es
- * raro: ya lo abrieron. A partir de ahí la tarjeta dice lo que realmente es.
+ * Una vez desbloqueado ya no tiene sentido decir "una sorpresa", pero el
+ * nombre sigue siendo "Secreto" para que acompañe al nav y no cante de qué
+ * se trata desde afuera.
  */
 function unlockedCardsSection() {
   return {
     tab: 'cards',
     icon: HelpCircle,
-    title: 'Cartas',
+    title: 'Secreto',
     description: 'Preguntas para jugar de a dos y conocernos un poco más.'
   };
 }
@@ -44,7 +46,7 @@ function unlockedCardsSection() {
  * check-in de ánimo (DailyCheckin.jsx) queda desactivado pero sin borrar,
  * por si se retoma más adelante.
  */
-const Home = ({ onNavigate }) => {
+const Home = ({ onNavigate, identity }) => {
   const sections = useMemo(() => {
     let isUnlocked = false;
     try {
@@ -96,6 +98,8 @@ const Home = ({ onNavigate }) => {
           </button>
         ))}
       </div>
+
+      <NotificationsCard identity={identity} />
     </motion.div>
   );
 };
