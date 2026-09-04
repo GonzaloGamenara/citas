@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Plus, Trash2, MapPin, CheckCircle2, Bookmark, Pencil, X, Sparkles } from 'lucide-react';
+import { Plus, Trash2, MapPin, CheckCircle2, Bookmark, Pencil, X, Sparkles, Gift, Clock, Lock } from 'lucide-react';
+import CategoryPicker from './CategoryPicker';
+import { categoryEmoji } from '../data/categories';
+import { isSurpriseLocked, prettySurpriseDate, countdownLabel } from '../utils/surprise';
+import { getTodayLocalISO } from '../utils/dateUtils';
 
 const INITIAL_WISHLIST = [
   {
@@ -33,7 +37,16 @@ const INITIAL_WISHLIST = [
   }
 ];
 
-const WishlistModule = ({ wishlist, onAddWish, onEditWish, onDeleteWish, onConvertToDate }) => {
+const WishlistModule = ({
+  wishlist,
+  onAddWish,
+  onEditWish,
+  onDeleteWish,
+  onConvertToDate,
+  identity,
+  customCategories = [],
+  onAddCustomCategory
+}) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
@@ -43,23 +56,23 @@ const WishlistModule = ({ wishlist, onAddWish, onEditWish, onDeleteWish, onConve
   const [category, setCategory] = useState('cafe');
   const [notes, setNotes] = useState('');
 
+  // Sorpresa: el otro ve que hay algo preparado, con día, duración y unas
+  // pistas, pero no qué es. Se destapa solo cuando llega la fecha.
+  const [isSurprise, setIsSurprise] = useState(false);
+  const [surpriseDate, setSurpriseDate] = useState(getTodayLocalISO());
+  const [surpriseDuration, setSurpriseDuration] = useState('2 hs');
+  const [hintEmojis, setHintEmojis] = useState('');
+
   // Form para editar
   const [editTitle, setEditTitle] = useState('');
   const [editLocation, setEditLocation] = useState('');
   const [editCategory, setEditCategory] = useState('cafe');
   const [editNotes, setEditNotes] = useState('');
 
-  const getEmojiForCategory = (cat) => {
-    switch (cat) {
-      case 'teatro': return '🎭';
-      case 'museo': return '🏛️';
-      case 'vino': return '🍷';
-      case 'cine': return '🎬';
-      case 'paseo': return '🌳';
-      case 'comida': return '🍕';
-      default: return '☕';
-    }
-  };
+  // Antes era un switch que sólo conocía 7 categorías y devolvía ☕ para el
+  // resto: elegir "Helado" te guardaba un café. Ahora sale de la lista real,
+  // que además incluye las categorías propias.
+  const getEmojiForCategory = (cat) => categoryEmoji(cat, customCategories);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -71,12 +84,20 @@ const WishlistModule = ({ wishlist, onAddWish, onEditWish, onDeleteWish, onConve
       location: location.trim() || 'CABA',
       category: category,
       emoji: getEmojiForCategory(category),
-      notes: notes.trim()
+      notes: notes.trim(),
+      isSurprise,
+      surpriseDate: isSurprise ? surpriseDate : null,
+      surpriseDuration: isSurprise ? surpriseDuration : '',
+      hintEmojis: isSurprise ? hintEmojis.trim() : ''
     });
 
     setTitle('');
     setLocation('');
     setNotes('');
+    setIsSurprise(false);
+    setHintEmojis('');
+    setSurpriseDate(getTodayLocalISO());
+    setSurpriseDuration('2 hs');
     setIsAdding(false);
   };
 
@@ -178,22 +199,17 @@ const WishlistModule = ({ wishlist, onAddWish, onEditWish, onDeleteWish, onConve
                 />
               </div>
 
-              <div className="form-group flex-1">
-                <label className="form-label">Categoría</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="form-input"
-                  style={{ background: 'white' }}
-                >
-                  <option value="cafe">☕ Café / Merienda</option>
-                  <option value="teatro">🎭 Teatro / Show</option>
-                  <option value="museo">🏛️ Museo / Arte</option>
-                  <option value="vino">🍷 Vino / Bar</option>
-                  <option value="cine">🎬 Cine</option>
-                  <option value="paseo">🌳 Paseo / Plaza</option>
-                </select>
-              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Categoría</label>
+              <CategoryPicker
+                value={category}
+                onChange={setCategory}
+                customCategories={customCategories}
+                onAddCustomCategory={onAddCustomCategory}
+                multiple={false}
+              />
             </div>
 
             <div className="form-group">
@@ -207,9 +223,73 @@ const WishlistModule = ({ wishlist, onAddWish, onEditWish, onDeleteWish, onConve
               />
             </div>
 
+            <button
+              type="button"
+              className={`surprise-toggle ${isSurprise ? 'active' : ''}`}
+              onClick={() => setIsSurprise((v) => !v)}
+              aria-pressed={isSurprise}
+            >
+              <Gift size={16} aria-hidden="true" />
+              <span className="surprise-toggle-text">
+                <strong>Que sea sorpresa</strong>
+                <small>
+                  Le llega el aviso con el día, la duración y las pistas — pero no qué es.
+                </small>
+              </span>
+              <span className={`surprise-switch ${isSurprise ? 'on' : ''}`} aria-hidden="true" />
+            </button>
+
+            <AnimatePresence>
+              {isSurprise && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="surprise-fields"
+                >
+                  <div className="form-row">
+                    <div className="form-group flex-1">
+                      <label className="form-label">¿Qué día?</label>
+                      <input
+                        type="date"
+                        value={surpriseDate}
+                        min={getTodayLocalISO()}
+                        onChange={(e) => setSurpriseDate(e.target.value)}
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group flex-1">
+                      <label className="form-label">¿Cuánto dura?</label>
+                      <input
+                        type="text"
+                        placeholder="Ej: 3 hs"
+                        value={surpriseDuration}
+                        onChange={(e) => setSurpriseDuration(e.target.value)}
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Pistas (2 o 3 emojis)</label>
+                    <input
+                      type="text"
+                      placeholder="🌃 🍷 🎂"
+                      value={hintEmojis}
+                      onChange={(e) => setHintEmojis(e.target.value)}
+                      className="form-input surprise-hints-input"
+                    />
+                    <span className="form-hint">
+                      Es lo único que va a ver hasta ese día. Que digan algo, pero no todo.
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <button type="submit" className="btn-disney-primary" style={{ marginTop: '0.4rem' }}>
-              <span>Guardar en Pendientes</span>
-              <Bookmark size={16} />
+              <span>{isSurprise ? 'Guardar la sorpresa' : 'Guardar en Pendientes'}</span>
+              {isSurprise ? <Gift size={16} /> : <Bookmark size={16} />}
             </button>
           </motion.form>
         )}
@@ -223,7 +303,51 @@ const WishlistModule = ({ wishlist, onAddWish, onEditWish, onDeleteWish, onConve
             <p>Aún no hay lugares en la lista de pendientes.</p>
           </div>
         ) : (
-          wishlist.map((item) => (
+          wishlist.map((item) => {
+            const locked = isSurpriseLocked(item, identity);
+
+            // Tapada: sólo el envoltorio. Ni título, ni lugar, ni notas —
+            // y tampoco los botones de editar o "ya fuimos", que arruinarían
+            // la sorpresa antes de tiempo.
+            if (locked) {
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="wishlist-item-card surprise-locked-card"
+                >
+                  <div className="wishlist-emoji-box surprise-gift-box">
+                    <Gift size={20} aria-hidden="true" />
+                  </div>
+
+                  <div className="wishlist-item-info">
+                    <h4 className="wishlist-item-title">Hay algo preparado</h4>
+
+                    <div className="surprise-locked-meta">
+                      <span>
+                        <Clock size={12} aria-hidden="true" />{' '}
+                        {prettySurpriseDate(item.surpriseDate)}
+                      </span>
+                      {item.surpriseDuration && <span>· {item.surpriseDuration}</span>}
+                    </div>
+
+                    {item.hintEmojis && (
+                      <div className="surprise-hints" aria-label="Pistas">
+                        {item.hintEmojis}
+                      </div>
+                    )}
+
+                    <p className="surprise-locked-note">
+                      <Lock size={11} aria-hidden="true" /> Se destapa solo ese día
+                      {item.surpriseDate ? ` — ${countdownLabel(item.surpriseDate)}` : ''}.
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            }
+
+            return (
             <React.Fragment key={item.id}>
               {editingItem?.id === item.id ? (
                 <motion.form
@@ -324,7 +448,19 @@ const WishlistModule = ({ wishlist, onAddWish, onEditWish, onDeleteWish, onConve
                   </div>
 
                   <div className="wishlist-item-info">
-                    <h4 className="wishlist-item-title">{item.title}</h4>
+                    <h4 className="wishlist-item-title">
+                      {item.title}
+                      {/* El autor sí ve el contenido, pero conviene recordarle
+                          que del otro lado todavía está envuelto. */}
+                      {item.isSurprise && (
+                        <span className="surprise-badge">
+                          <Gift size={10} aria-hidden="true" />
+                          {countdownLabel(item.surpriseDate) === 'ya pasó'
+                            ? 'destapada'
+                            : 'sorpresa'}
+                        </span>
+                      )}
+                    </h4>
                     {item.location && (
                       <div className="wishlist-item-meta">
                         <MapPin size={12} /> {item.location}
@@ -364,7 +500,8 @@ const WishlistModule = ({ wishlist, onAddWish, onEditWish, onDeleteWish, onConve
                 </motion.div>
               )}
             </React.Fragment>
-          ))
+            );
+          })
         )}
       </div>
     </motion.div>

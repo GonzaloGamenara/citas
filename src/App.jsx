@@ -16,6 +16,11 @@ import { isSupabaseConfigured } from './services/supabaseClient';
 import { fetchDates, upsertDate, deleteDate, subscribeToDates } from './services/datesService';
 import { fetchWishlist, upsertWish, deleteWish, subscribeToWishlist } from './services/wishlistService';
 import { fetchMoodForDay, setMoodForDay, subscribeToMood } from './services/moodService';
+import {
+  fetchCustomCategories,
+  upsertCustomCategory,
+  subscribeToCustomCategories
+} from './services/categoriesService';
 import { migrateLocalDataIfNeeded } from './services/migrateLocalData';
 import './styles/theme.css';
 
@@ -66,6 +71,7 @@ const INITIAL_HISTORY_DATES = [
 // ignore — el primer fetch a Supabase repuebla todo con los datos reales.
 const DATES_CACHE_KEY = 'citas_history_dates_v3';
 const WISHLIST_CACHE_KEY = 'citas_wishlist_v2';
+const CATEGORIES_CACHE_KEY = 'citas_custom_categories_v1';
 
 /**
  * Caché local de respaldo: sólo se usa para pintar algo instantáneo al abrir
@@ -125,6 +131,7 @@ function App() {
 
   const [historyDates, setHistoryDates] = useState(() => loadCache(DATES_CACHE_KEY));
   const [wishlist, setWishlist] = useState(() => loadCache(WISHLIST_CACHE_KEY));
+  const [customCategories, setCustomCategories] = useState(() => loadCache(CATEGORIES_CACHE_KEY));
 
   // La pantalla "Hoy" (DailyCheckin) está desactivada por ahora — Home la
   // reemplaza en ese lugar del nav — pero se deja el fetch/realtime del
@@ -209,6 +216,40 @@ function App() {
     });
   }, []);
 
+  // Las categorías propias se piden aparte y a propósito: son un agregado
+  // sobre las 14 fijas. Si la tabla no existe todavía (o falla), la app tiene
+  // que seguir funcionando igual en vez de quedarse sin citas ni pendientes.
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
+    let cancelled = false;
+    fetchCustomCategories()
+      .then((cats) => {
+        if (cancelled) return;
+        setCustomCategories(cats);
+        saveCache(CATEGORIES_CACHE_KEY, cats);
+      })
+      .catch((e) =>
+        console.error('No se pudieron leer las categorías propias (se usan las fijas):', e)
+      );
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Tiempo real: categorías propias (si uno inventa una, al otro le aparece)
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    return subscribeToCustomCategories({
+      onInsert: (item) =>
+        setCustomCategories((prev) => (prev.some((c) => c.id === item.id) ? prev : [...prev, item])),
+      onUpdate: (item) =>
+        setCustomCategories((prev) => prev.map((c) => (c.id === item.id ? item : c))),
+      onDelete: (id) => setCustomCategories((prev) => prev.filter((c) => c.id !== id))
+    });
+  }, []);
+
   // Tiempo real: ánimo de hoy (si Juli lo toca desde su teléfono, Gonza lo ve solo)
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -223,6 +264,21 @@ function App() {
   useEffect(() => {
     saveCache(WISHLIST_CACHE_KEY, wishlist);
   }, [wishlist]);
+
+  useEffect(() => {
+    saveCache(CATEGORIES_CACHE_KEY, customCategories);
+  }, [customCategories]);
+
+  const handleAddCustomCategory = useCallback((category) => {
+    setCustomCategories((prev) =>
+      prev.some((c) => c.id === category.id) ? prev : [...prev, category]
+    );
+    if (isSupabaseConfigured) {
+      upsertCustomCategory(category).catch((e) =>
+        console.error('Error guardando la categoría en Supabase:', e)
+      );
+    }
+  }, []);
 
   const handleSaveHistoryDate = useCallback(
     (newOrUpdatedDate) => {
@@ -364,6 +420,8 @@ function App() {
             historyDates={historyDates}
             onSaveDate={handleSaveHistoryDate}
             onDeleteDate={handleDeleteHistoryDate}
+            customCategories={customCategories}
+            onAddCustomCategory={handleAddCustomCategory}
           />
         )}
 
@@ -375,6 +433,9 @@ function App() {
             onEditWish={handleEditWish}
             onDeleteWish={handleDeleteWish}
             onConvertToDate={handleConvertWishToDate}
+            identity={identity}
+            customCategories={customCategories}
+            onAddCustomCategory={handleAddCustomCategory}
           />
         )}
 

@@ -4,30 +4,25 @@ import { ChevronLeft, ChevronRight, Plus, Calendar, MapPin, Clock, Heart, Hourgl
 import DateFormModal from './DateFormModal';
 import DateDetailModal from './DateDetailModal';
 import FullMapHuellas from './FullMapHuellas';
+import DayDatesSheet from './DayDatesSheet';
+import { categoryEmoji, categoryName } from '../data/categories';
 
-const CATEGORIES_MAP = {
-  cafe: { name: 'Café', emoji: '☕' },
-  postre: { name: 'Postre', emoji: '🍰' },
-  vino: { name: 'Vino', emoji: '🍷' },
-  cerveza: { name: 'Cerveza', emoji: '🍺' },
-  tragos: { name: 'Tragos', emoji: '🍹' },
-  comida: { name: 'Cena/Almuerzo', emoji: '🍕' },
-  helado: { name: 'Helado', emoji: '🍦' },
-  paseo: { name: 'Paseo', emoji: '🌳' },
-  mates: { name: 'Mates', emoji: '🌅' },
-  cine: { name: 'Cine', emoji: '🎬' },
-  teatro: { name: 'Teatro', emoji: '🎭' },
-  musica: { name: 'Música', emoji: '🎶' },
-  museo: { name: 'Museo', emoji: '🏛️' },
-  secreto: { name: 'Sorpresa', emoji: '🪄' }
-};
-
-const HistoryModule = ({ historyDates, onSaveDate, onDeleteDate }) => {
+const HistoryModule = ({
+  historyDates,
+  onSaveDate,
+  onDeleteDate,
+  customCategories = [],
+  onAddCustomCategory
+}) => {
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
   const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [selectedDetailItem, setSelectedDetailItem] = useState(null);
+  // Día abierto en la hoja de "las citas de este día". Un día puede tener
+  // varias: antes tocar el día abría siempre la primera y no había forma de
+  // llegar a las otras ni de sumar una nueva ahí.
+  const [selectedDay, setSelectedDay] = useState(null);
 
   const monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -72,12 +67,20 @@ const HistoryModule = ({ historyDates, onSaveDate, onDeleteDate }) => {
 
   const handleDayClick = (dateStr) => {
     const datesOnDay = historyDates.filter((d) => d.date === dateStr);
-    if (datesOnDay.length >= 1) {
-      setSelectedDetailItem(datesOnDay[0]);
-    } else {
+    if (datesOnDay.length === 0) {
+      // Día vacío: al form directo, sin pasos de más.
       setEditingItem({ date: dateStr });
       setIsFormOpen(true);
+      return;
     }
+    setSelectedDay(dateStr);
+  };
+
+  /** Sumar otra cita al día que está abierto en la hoja. */
+  const handleAddOnDay = (dateStr) => {
+    setSelectedDay(null);
+    setEditingItem({ date: dateStr });
+    setIsFormOpen(true);
   };
 
   return (
@@ -208,7 +211,10 @@ const HistoryModule = ({ historyDates, onSaveDate, onDeleteDate }) => {
                   <span className="day-number">{dayNum}</span>
                   {hasDate && (
                     <div className="day-date-badge">
-                      <span>{CATEGORIES_MAP[firstCat]?.emoji || '💖'}</span>
+                      <span>{categoryEmoji(firstCat, customCategories)}</span>
+                      {datesOnDay.length > 1 && (
+                        <span className="day-count-badge">{datesOnDay.length}</span>
+                      )}
                     </div>
                   )}
                 </motion.div>
@@ -256,7 +262,7 @@ const HistoryModule = ({ historyDates, onSaveDate, onDeleteDate }) => {
                         className="history-card-item"
                       >
                         <div className="history-card-emoji-box">
-                          {CATEGORIES_MAP[cats[0]]?.emoji || '💖'}
+                          {categoryEmoji(cats[0], customCategories)}
                         </div>
 
                         <div className="history-card-content">
@@ -266,10 +272,10 @@ const HistoryModule = ({ historyDates, onSaveDate, onDeleteDate }) => {
 
                           <div className="history-card-cats-row">
                             {cats.map((cId) => {
-                              const catObj = CATEGORIES_MAP[cId] || { name: cId, emoji: '💖' };
                               return (
                                 <span key={cId} className="mini-cat-chip">
-                                  {catObj.emoji} {catObj.name}
+                                  {categoryEmoji(cId, customCategories)}{' '}
+                                  {categoryName(cId, customCategories)}
                                 </span>
                               );
                             })}
@@ -311,8 +317,23 @@ const HistoryModule = ({ historyDates, onSaveDate, onDeleteDate }) => {
         </>
       )}
 
+      {/* Las citas de un día puntual: puede haber más de una */}
+      <DayDatesSheet
+        dateStr={selectedDay}
+        dates={selectedDay ? historyDates.filter((d) => d.date === selectedDay) : []}
+        customCategories={customCategories}
+        onClose={() => setSelectedDay(null)}
+        onSelect={(item) => {
+          setSelectedDay(null);
+          setSelectedDetailItem(item);
+        }}
+        onAddAnother={handleAddOnDay}
+      />
+
       {/* Modal Form */}
       <DateFormModal
+        customCategories={customCategories}
+        onAddCustomCategory={onAddCustomCategory}
         isOpen={isFormOpen}
         onClose={() => {
           setIsFormOpen(false);

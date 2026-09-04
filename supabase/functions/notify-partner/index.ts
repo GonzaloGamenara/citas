@@ -34,6 +34,18 @@ webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
 const NAMES: Record<string, string> = { gonza: 'Gonza', juli: 'Juli' };
 
+const MONTHS = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+];
+
+/** "2026-09-12" → "12 de septiembre". A mano, para no arrastrar la zona horaria. */
+function formatDay(dateStr: string | null): string {
+  if (!dateStr) return '';
+  const [, m, d] = dateStr.split('-').map(Number);
+  return `${d} de ${MONTHS[m - 1] ?? ''}`;
+}
+
 /** El otro de los dos. Si no sabemos quién escribió, no se notifica a nadie. */
 function partnerOf(userKey: string | null): string | null {
   if (userKey === 'gonza') return 'juli';
@@ -50,6 +62,22 @@ function buildMessage(table: string, row: Record<string, unknown>) {
       title: `${author} agregó una cita 💛`,
       body: title || 'Entrá a ver de qué se trata.',
       tag: 'cita-nueva',
+      url: '/'
+    };
+  }
+
+  // Sorpresa: se avisa que hay algo y para cuándo, nunca qué es. El título
+  // no puede entrar acá — la notificación se ve en la pantalla bloqueada.
+  if (row.is_surprise) {
+    const hints = String(row.hint_emojis ?? '').trim();
+    const when = formatDay(row.surprise_date as string | null);
+    const duration = String(row.surprise_duration ?? '').trim();
+
+    const parts = [when, duration].filter(Boolean).join(' · ');
+    return {
+      title: `${author} preparó algo 🎁`,
+      body: [parts, hints].filter(Boolean).join('  ') || 'Se destapa el día.',
+      tag: 'sorpresa-nueva',
       url: '/'
     };
   }

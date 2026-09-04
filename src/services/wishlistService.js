@@ -10,7 +10,11 @@ function fromRow(row) {
     category: row.category || 'cafe',
     emoji: row.emoji || '📌',
     notes: row.notes || '',
-    createdBy: row.created_by || null
+    createdBy: row.created_by || null,
+    isSurprise: Boolean(row.is_surprise),
+    surpriseDate: row.surprise_date || null,
+    surpriseDuration: row.surprise_duration || '',
+    hintEmojis: row.hint_emojis || ''
   };
 }
 
@@ -23,7 +27,11 @@ function toRow(item) {
     emoji: item.emoji || null,
     notes: item.notes || null,
     // Quién lo agregó: lo usa la notificación para avisarle al otro.
-    created_by: item.createdBy || null
+    created_by: item.createdBy || null,
+    is_surprise: Boolean(item.isSurprise),
+    surprise_date: item.surpriseDate || null,
+    surprise_duration: item.surpriseDuration || null,
+    hint_emojis: item.hintEmojis || null
   };
 }
 

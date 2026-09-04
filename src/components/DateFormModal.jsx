@@ -1,27 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Clock, MapPin, Hourglass, Film, Drama, Plus, Check, Sparkles, Map } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, Hourglass, Film, Drama, Plus, Sparkles, Map } from 'lucide-react';
 import { searchPlaces, searchMovies, searchTheatre } from '../services/apiService';
 import InteractiveMapPicker from './InteractiveMapPicker';
+import CategoryPicker from './CategoryPicker';
 import { getTodayLocalISO } from '../utils/dateUtils';
-
-const ALL_CATEGORIES = [
-  { id: 'cafe', name: 'Café', emoji: '☕' },
-  { id: 'postre', name: 'Merienda / Postre', emoji: '🍰' },
-  { id: 'vino', name: 'Vino / Copa', emoji: '🍷' },
-  { id: 'cerveza', name: 'Cerveza / Bar', emoji: '🍺' },
-  { id: 'tragos', name: 'Tragos / Cócteles', emoji: '🍹' },
-  { id: 'comida', name: 'Almuerzo / Cena', emoji: '🍕' },
-  { id: 'helado', name: 'Helado', emoji: '🍦' },
-  { id: 'paseo', name: 'Paseo / Parque', emoji: '🌳' },
-  { id: 'mates', name: 'Sunset / Mates', emoji: '🌅' },
-  { id: 'cine', name: 'Cine / Película', emoji: '🎬' },
-  { id: 'teatro', name: 'Teatro / Obra', emoji: '🎭' },
-  { id: 'musica', name: 'Concierto / Música', emoji: '🎶' },
-  { id: 'museo', name: 'Museo / Exposición', emoji: '🏛️' },
-  { id: 'secreto', name: 'Plan Sorpresa', emoji: '🪄' }
-];
 
 const QUICK_ZONES = [
   { name: 'Palermo', emoji: '🏙️' },
@@ -47,7 +31,14 @@ const normalizeLocation = (loc) => {
   return name ? { ...loc, name } : null;
 };
 
-const DateFormModal = ({ isOpen, onClose, onSave, initialData }) => {
+const DateFormModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  initialData,
+  customCategories = [],
+  onAddCustomCategory
+}) => {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(getTodayLocalISO());
   const [time, setTime] = useState('19:00');
@@ -141,15 +132,13 @@ const DateFormModal = ({ isOpen, onClose, onSave, initialData }) => {
   const showsTeatro = categories.includes('teatro');
   const showMediaSearch = showsCine || showsTeatro;
 
-  const toggleCategory = (catId) => {
-    setCategories((prev) => {
-      if (prev.includes(catId)) {
-        if (prev.length === 1) return prev;
-        return prev.filter((c) => c !== catId);
-      } else {
-        return [...prev, catId];
-      }
-    });
+  /**
+   * Nunca dejar la cita sin categoría: `handleSubmit` sólo exige título y
+   * fecha, así que si acá se permitiera vaciar la lista se guardaría una cita
+   * sin emoji ni chip en el calendario.
+   */
+  const handleCategoriesChange = (next) => {
+    setCategories(next.length === 0 ? categories : next);
   };
 
   // Si sólo una de las dos categorías está seleccionada, el toggle "Película
@@ -276,23 +265,13 @@ const DateFormModal = ({ isOpen, onClose, onSave, initialData }) => {
             {/* Categorías Múltiples */}
             <div className="form-group">
               <label className="form-label">Tipos de Plan (Elegí uno o más) *</label>
-              <div className="category-chips">
-                {ALL_CATEGORIES.map((cat) => {
-                  const isSelected = categories.includes(cat.id);
-                  return (
-                    <button
-                      type="button"
-                      key={cat.id}
-                      className={`chip-btn ${isSelected ? 'active' : ''}`}
-                      onClick={() => toggleCategory(cat.id)}
-                    >
-                      <span>{cat.emoji}</span>
-                      <span>{cat.name}</span>
-                      {isSelected && <Check size={12} strokeWidth={3} />}
-                    </button>
-                  );
-                })}
-              </div>
+              <CategoryPicker
+                value={categories}
+                onChange={handleCategoriesChange}
+                customCategories={customCategories}
+                onAddCustomCategory={onAddCustomCategory}
+                multiple
+              />
             </div>
 
             {/* Fecha y Hora */}

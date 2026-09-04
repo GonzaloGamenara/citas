@@ -58,6 +58,31 @@ alter table public.dates add column if not exists created_by text;
 alter table public.wishlist add column if not exists created_by text;
 
 -- ---------------------------------------------------------
+-- Tabla: categorías propias
+-- Las 14 fijas viven en el código (src/data/categories.js); acá sólo van las
+-- que la pareja se inventa. Van al servidor porque una categoría que existe
+-- en un solo teléfono le muestra al otro el emoji comodín.
+-- ---------------------------------------------------------
+create table if not exists public.custom_categories (
+  id text primary key,
+  name text not null,
+  emoji text not null,
+  created_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------
+-- Pendientes sorpresa.
+--
+-- La gracia es que el otro sepa que hay algo preparado — cuándo y cuánto
+-- dura — sin saber qué es. El título y las notas se ocultan en el cliente
+-- hasta que llega `surprise_date`; se destapa solo ese día.
+-- ---------------------------------------------------------
+alter table public.wishlist add column if not exists is_surprise boolean not null default false;
+alter table public.wishlist add column if not exists surprise_date date;
+alter table public.wishlist add column if not exists surprise_duration text;
+alter table public.wishlist add column if not exists hint_emojis text;
+
+-- ---------------------------------------------------------
 -- Tabla: a qué dispositivos mandarle notificaciones
 -- Una fila por navegador/dispositivo. Si alguien tiene la app en el iPhone y
 -- en un iPad, son dos filas con el mismo user_key.
@@ -94,7 +119,7 @@ create table if not exists public.card_state (
 --
 -- La app no tiene login (es para 2 personas, con la key publishable
 -- embebida en el bundle). RLS acá NO restringe por usuario: sólo evita que,
--- por accidente o bug, alguien haga algo que no sea leer/escribir estas 5
+-- por accidente o bug, alguien haga algo que no sea leer/escribir estas 6
 -- tablas puntuales. La privacidad real depende de que la URL de la app y
 -- este proyecto de Supabase no se compartan públicamente.
 -- ---------------------------------------------------------
@@ -103,6 +128,7 @@ alter table public.wishlist enable row level security;
 alter table public.daily_moods enable row level security;
 alter table public.card_state enable row level security;
 alter table public.push_subscriptions enable row level security;
+alter table public.custom_categories enable row level security;
 
 drop policy if exists "acceso total dates" on public.dates;
 create policy "acceso total dates" on public.dates
@@ -122,6 +148,10 @@ create policy "acceso total card_state" on public.card_state
 
 drop policy if exists "acceso total push_subscriptions" on public.push_subscriptions;
 create policy "acceso total push_subscriptions" on public.push_subscriptions
+  for all using (true) with check (true);
+
+drop policy if exists "acceso total custom_categories" on public.custom_categories;
+create policy "acceso total custom_categories" on public.custom_categories
   for all using (true) with check (true);
 
 -- ---------------------------------------------------------
