@@ -123,7 +123,9 @@
   overscroll-behavior: contain;
 }
 
-.letter-overlay:not(.stage-read) {
+/* Sin scroll mientras se anima el sobre. Ojo: el redactor también es un
+   .letter-overlay y ahí el scroll tiene que andar siempre. */
+.letter-overlay[class*='stage-']:not(.stage-read) {
   overflow-y: hidden;
 }
 

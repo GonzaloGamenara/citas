@@ -570,6 +570,25 @@ body {
   min-height: 100dvh;
 }
 
+/* Franja detrás de la barra del sistema (hora, batería) en el iPhone con la
+   app instalada: con status-bar-style black-translucent esa zona es parte de
+   la página y el texto del sistema es blanco, así que necesita un fondo con
+   contraste. Las cartas quedan por encima (z-index 10000) y la pintan de marrón. */
+.status-bar-shim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--primary-pink);
+  z-index: 9000;
+  pointer-events: none;
+}
+
+.app-container.candle-mode-active .status-bar-shim {
+  background: #1a0b22;
+}
+
 /* Container Principal Móvil Centrado */
 .app-container {
   width: 100%;

@@ -8,7 +8,11 @@
     <!-- Color de la barra de estado e integración iOS Safari -->
     <meta name="theme-color" content="#ffe3ec" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- black-translucent: en iOS la app se dibuja también detrás de la barra de
+         la hora. Así las cartas (pantalla completa, fondo oscuro) la pintan de
+         su color; en el resto de la app la tiñe .status-bar-shim. iOS ignora
+         los cambios dinámicos de theme-color en la app instalada. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Citas" />
     <!-- iOS ignora los íconos del manifest: sólo lee este link para el ícono de inicio -->
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />

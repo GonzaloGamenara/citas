@@ -410,6 +410,7 @@ function App() {
   if (!identity) {
     return (
       <main className={`app-container ${isCandleMode ? 'candle-mode-active' : ''}`}>
+        <div className="status-bar-shim" aria-hidden="true" />
         <BackgroundSparkles />
         <CandleOverlay isCandleMode={isCandleMode} />
         <IdentityGate onChoose={handleChooseIdentity} />
@@ -419,6 +420,7 @@ function App() {
 
   return (
     <main className={`app-container ${isCandleMode ? 'candle-mode-active' : ''}`}>
+        <div className="status-bar-shim" aria-hidden="true" />
       <BackgroundSparkles />
       <CandleOverlay isCandleMode={isCandleMode} />
       <InstallPwaGuide />
