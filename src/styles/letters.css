@@ -1,0 +1,754 @@
+/* =========================================================
+   CARTAS 💌 — papel, sobre, lacre y despliegue
+   ========================================================= */
+:root {
+  --letter-ink: #1d2a5e;
+  --letter-paper: #f6f1e4;
+  --letter-paper-shade: #ece4d1;
+  --letter-font: 'Playwrite AR', 'Caveat', cursive;
+  --letter-monogram-font: 'Pinyon Script', 'Playwrite AR', cursive;
+  --letter-width: min(calc(100vw - 32px), 440px);
+  --desk-bg:
+    radial-gradient(ellipse at 50% 18%, rgba(255, 214, 170, 0.16) 0%, transparent 55%),
+    repeating-linear-gradient(96deg, rgba(0, 0, 0, 0.05) 0 2px, transparent 2px 9px),
+    linear-gradient(170deg, #4a2b1d 0%, #321b12 55%, #1f100a 100%);
+  --wax: #a3123a;
+}
+
+/* ---------------- Hoja ---------------- */
+.letter-paper {
+  position: relative;
+  width: var(--letter-width);
+  padding: 3.4rem 1.6rem 3.2rem 1.7rem;
+  color: var(--letter-ink);
+  font-family: var(--letter-font);
+  font-size: 15px;
+  line-height: 2.05;
+  font-weight: 400;
+  text-align: left;
+  isolation: isolate;
+  flex-shrink: 0;
+}
+
+/* Papel con borde irregular (filtro SVG sólo al fondo, no al texto) */
+.letter-paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(255, 255, 255, 0.55) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 90%, rgba(190, 170, 130, 0.18) 0%, transparent 60%),
+    var(--letter-paper);
+  filter: url(#letter-deckle);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Pliegues en tercios, como en la carta de verdad */
+.letter-paper-read::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent calc(33.333% - 6px),
+      rgba(120, 100, 70, 0.1) calc(33.333% - 1px),
+      rgba(255, 255, 255, 0.7) 33.333%,
+      rgba(120, 100, 70, 0.05) calc(33.333% + 5px),
+      transparent calc(33.333% + 14px),
+      transparent calc(66.667% - 6px),
+      rgba(120, 100, 70, 0.1) calc(66.667% - 1px),
+      rgba(255, 255, 255, 0.7) 66.667%,
+      rgba(120, 100, 70, 0.05) calc(66.667% + 5px),
+      transparent calc(66.667% + 14px)
+    );
+}
+
+.letter-monogram {
+  position: absolute;
+  top: 0.9rem;
+  left: 1.3rem;
+  font-family: var(--letter-monogram-font);
+  font-size: 2.1rem;
+  line-height: 1;
+  color: var(--letter-ink);
+  opacity: 0.9;
+}
+
+.letter-body p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.letter-body p + p {
+  margin-top: 1.05em;
+}
+
+.letter-paper-blank {
+  height: 100%;
+  padding: 0;
+}
+
+.letter-paper-blank::before {
+  background: linear-gradient(180deg, var(--letter-paper-shade) 0%, var(--letter-paper) 100%);
+}
+
+/* ---------------- Overlay (escritorio) ---------------- */
+.letter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--desk-bg);
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.letter-overlay.stage-envelope,
+.letter-overlay.stage-opening,
+.letter-overlay.stage-rising,
+.letter-overlay.stage-unfolding {
+  overflow-y: hidden;
+}
+
+.letter-close-btn {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  z-index: 5;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 240, 220, 0.25);
+  background: rgba(20, 10, 6, 0.45);
+  color: #f6ead8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.letter-close-inline {
+  position: static;
+}
+
+.letter-preview-tag {
+  position: absolute;
+  top: max(20px, calc(env(safe-area-inset-top) + 6px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f6ead8;
+  background: rgba(20, 10, 6, 0.5);
+  border: 1px solid rgba(255, 240, 220, 0.2);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.letter-measure {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.letter-scroll {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: max(64px, calc(env(safe-area-inset-top) + 56px)) 16px max(32px, env(safe-area-inset-bottom));
+}
+
+.letter-wrap {
+  position: relative;
+  width: var(--letter-width);
+  flex-shrink: 0;
+}
+
+/* ---------------- Sobre ---------------- */
+.letter-envelope-stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.envelope {
+  --env-w: min(calc(100vw - 48px), 360px);
+  position: relative;
+  width: var(--env-w);
+  height: calc(var(--env-w) * 0.64);
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  perspective: 900px;
+  filter: drop-shadow(0 22px 30px rgba(0, 0, 0, 0.45));
+}
+
+.envelope > span {
+  position: absolute;
+  display: block;
+}
+
+.envelope-back {
+  inset: 0;
+  z-index: 1;
+  border-radius: 6px;
+  background: linear-gradient(160deg, #e9dcc3 0%, #dccaa9 100%);
+}
+
+/* La punta de la carta que asoma cuando se abre la solapa */
+.envelope-peek {
+  left: 7%;
+  right: 7%;
+  top: 8%;
+  height: 80%;
+  z-index: 3;
+  background: var(--letter-paper);
+  border-radius: 2px;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.3, 1) 0.45s;
+}
+
+.envelope.is-open .envelope-peek {
+  transform: translateY(-38%);
+}
+
+.envelope-pocket {
+  inset: 0;
+  z-index: 4;
+  border-radius: 6px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.35) 0%, transparent 40%),
+    linear-gradient(170deg, #f1e6d0 0%, #e4d4b6 100%);
+  clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+}
+
+.envelope-flap {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 60%;
+  z-index: 6;
+  background: linear-gradient(180deg, #e8d9bc 0%, #ddc9a6 100%);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  transition: transform 0.65s cubic-bezier(0.5, 0, 0.3, 1) 0.2s, z-index 0s linear 0.52s;
+}
+
+.envelope.is-open .envelope-flap {
+  transform: rotateX(180deg);
+  z-index: 2;
+}
+
+.envelope-address {
+  left: 0;
+  right: 0;
+  bottom: 7%;
+  z-index: 5;
+  text-align: center;
+  font-family: var(--letter-font);
+  font-size: 1.15rem;
+  color: var(--letter-ink);
+}
+
+.envelope-address-label {
+  display: block;
+  font-size: 0.7rem;
+  opacity: 0.65;
+  margin-bottom: 0.1rem;
+}
+
+.wax-seal {
+  left: 50%;
+  top: 60%;
+  z-index: 7;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border-radius: 47% 53% 50% 50% / 52% 48% 52% 48%;
+  background: radial-gradient(circle at 35% 30%, #d8335d 0%, var(--wax) 45%, #6d0a25 100%);
+  box-shadow:
+    0 3px 8px rgba(80, 0, 20, 0.45),
+    inset 0 2px 3px rgba(255, 255, 255, 0.25),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-58%);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  animation: sealPulse 2.4s ease-in-out infinite;
+}
+
+.wax-seal::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 200, 210, 0.35);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.wax-seal-letter {
+  position: relative;
+  font-family: var(--letter-monogram-font);
+  font-size: 1.7rem;
+  line-height: 1;
+  color: #ffd5de;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.envelope.is-open .wax-seal {
+  animation: none;
+  transform: translateY(-58%) scale(1.25) rotate(12deg);
+  opacity: 0;
+}
+
+@keyframes sealPulse {
+  0%, 100% { transform: translateY(-58%) scale(1); }
+  50% { transform: translateY(-58%) scale(1.06); }
+}
+
+.envelope-hint {
+  max-width: 280px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #f1e3cf;
+  opacity: 0.9;
+}
+
+
+
+
+
+/* ---------------- Despliegue en tres ---------------- */
+.letter-fold {
+  position: relative;
+  width: 100%;
+  perspective: 2200px;
+  transform-style: preserve-3d;
+}
+
+.fold-panel {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.fold-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.fold-face-top { clip-path: inset(0 0 66.6% 0); }
+.fold-face-mid { clip-path: inset(33.3% 0 33.3% 0); }
+.fold-face-bottom { clip-path: inset(66.6% 0 0 0); }
+
+/* El dorso del tercio: papel liso, se ve mientras la carta está doblada */
+.fold-face-back {
+  transform: rotateY(180deg);
+}
+
+.fold-face-back .letter-paper-blank {
+  height: 100%;
+}
+
+.fold-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(60, 40, 20, 0.5), rgba(60, 40, 20, 0.15));
+  pointer-events: none;
+}
+
+/* ---------------- Botones ---------------- */
+.letter-read-actions {
+  width: var(--letter-width);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 1.6rem;
+}
+
+.letter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 46px;
+  padding: 0.7rem 1rem;
+  border-radius: 14px;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.letter-btn:active { transform: scale(0.97); }
+.letter-btn:disabled { opacity: 0.45; cursor: default; }
+
+.letter-btn-primary {
+  border: 0;
+  background: linear-gradient(135deg, #c21a4c 0%, #9c1240 100%);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(120, 10, 40, 0.35);
+}
+
+.letter-btn-ghost {
+  border: 1px solid rgba(255, 240, 220, 0.3);
+  background: rgba(255, 245, 230, 0.08);
+  color: #f6ead8;
+}
+
+/* ---------------- Redactor ---------------- */
+.letter-composer {
+  display: flex;
+  flex-direction: column;
+}
+
+.composer-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: max(12px, env(safe-area-inset-top)) 14px 10px;
+  background: linear-gradient(180deg, rgba(40, 22, 14, 0.95) 0%, rgba(40, 22, 14, 0.75) 80%, transparent 100%);
+}
+
+.composer-topbar-spacer { width: 38px; }
+
+.composer-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.composer-heading-label {
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(246, 234, 216, 0.7);
+}
+
+.composer-heading-name {
+  font-family: var(--letter-font);
+  font-size: 1.2rem;
+  color: #f6ead8;
+}
+
+
+
+
+.composer-scroll {
+  flex: 1 0 auto;
+  justify-content: flex-start;
+  padding-top: 8px;
+  padding-bottom: 150px;
+}
+
+.letter-paper-editable {
+  min-height: 60vh;
+}
+
+.letter-textarea {
+  display: block;
+  width: 100%;
+  min-height: 45vh;
+  border: 0;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  background: transparent;
+  color: var(--letter-ink);
+  font: inherit;
+  line-height: inherit;
+  caret-color: var(--letter-ink);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.letter-textarea::placeholder {
+  color: rgba(29, 42, 94, 0.35);
+}
+
+.composer-tip {
+  margin-top: 0.9rem;
+  font-size: 0.75rem;
+  color: rgba(246, 234, 216, 0.6);
+}
+
+.composer-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 26px 16px max(16px, env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, rgba(31, 16, 10, 0.98) 0%, rgba(31, 16, 10, 0.9) 70%, transparent 100%);
+}
+
+.composer-actions-row {
+  width: var(--letter-width);
+  display: flex;
+  gap: 0.55rem;
+}
+
+.composer-actions-row .letter-btn { flex: 1; }
+
+.composer-confirm {
+  width: var(--letter-width);
+  text-align: center;
+}
+
+.composer-confirm p {
+  font-size: 0.88rem;
+  color: #f6ead8;
+  margin-bottom: 0.7rem;
+}
+
+.composer-error {
+  font-size: 0.8rem;
+  color: #ffb4c3;
+  margin-bottom: 0.6rem;
+  text-align: center;
+}
+
+.composer-sent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  color: #f6ead8;
+}
+
+.composer-sent-icon { color: #ffd5de; margin-bottom: 0.8rem; }
+
+.composer-sent-title {
+  font-family: var(--letter-font);
+  font-size: 1.6rem;
+}
+
+.composer-sent-sub {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  max-width: 280px;
+}
+
+/* ---------------- Sección Cartas ---------------- */
+.letters-container { text-align: left; }
+
+.letters-test-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 10px;
+  background: #fff8e1;
+  border: 1px solid #f5d77a;
+  color: #7a5a00;
+  font-size: 0.74rem;
+}
+
+.letters-write-btn {
+  width: 100%;
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+
+
+
+.letters-empty {
+  margin-top: 1.2rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.letters-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+}
+
+.letters-item-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.letters-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.75rem 0.8rem;
+  border-radius: 16px;
+  border: 1.5px solid #ffe0e6;
+  background: #fffafb;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.letters-item:active { transform: scale(0.98); }
+
+.letters-item.is-unread {
+  border-color: #ff9fb4;
+  background: linear-gradient(135deg, #fff5f8 0%, #ffe9f0 100%);
+}
+
+.letters-item-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6f1e4;
+  color: var(--letter-ink);
+  border: 1px solid #e6dcc5;
+}
+
+.letters-item-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.letters-item-meta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.letters-item-snippet {
+  font-family: var(--letter-font);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--letter-ink);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.letters-item-badge {
+  align-self: flex-start;
+  font-family: var(--font-heading);
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--pink-text);
+  background: #ffe4ec;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
+.letters-delete-btn {
+  flex-shrink: 0;
+  width: 40px;
+  border-radius: 14px;
+  border: 1.5px solid #ffe0e6;
+  background: #fffafb;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Tarjeta de Inicio con carta sin abrir */
+.home-section-card.has-unread-letter {
+  border-color: #ff9fb4;
+  background: linear-gradient(135deg, #fff5f8 0%, #ffe6ee 100%);
+}
+
+.home-section-badge {
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--primary-pink);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* Modo Vela */
+.app-container.candle-mode-active .letters-item,
+.app-container.candle-mode-active .letters-delete-btn {
+  background: rgba(36, 18, 50, 0.94) !important;
+  border-color: rgba(255, 71, 112, 0.35) !important;
+}
+
+.app-container.candle-mode-active .letters-item-meta,
+.app-container.candle-mode-active .letters-empty,
+.app-container.candle-mode-active .letters-delete-btn {
+  color: #f5d0e6 !important;
+}
+
+.app-container.candle-mode-active .letters-item-snippet {
+  color: #fde7c8 !important;
+}
+
+.app-container.candle-mode-active .home-section-card.has-unread-letter {
+  border-color: #f472b6 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wax-seal { animation: none; }
+}

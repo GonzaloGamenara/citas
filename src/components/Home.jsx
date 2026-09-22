@@ -1,12 +1,19 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarHeart, Bookmark, HelpCircle, ChevronRight } from 'lucide-react';
+import { CalendarHeart, Bookmark, HelpCircle, ChevronRight, Mail } from 'lucide-react';
 import { UNLOCKED_STORAGE_KEY } from './CardsModule';
 import NotificationsCard from './NotificationsCard';
 
 // Accesos rápidos a las otras 3 secciones: cada una con un ícono + una línea
 // que explica qué hay adentro, sin vueltas.
 const SECTIONS = [
+  {
+    // Cartas no tiene botón en el Navbar (no entra un quinto en el celular): se llega desde acá
+    tab: 'letters',
+    icon: Mail,
+    title: 'Cartas',
+    description: 'Cartas de uno para el otro, para leer despacio.'
+  },
   {
     tab: 'history',
     icon: CalendarHeart,
@@ -46,7 +53,7 @@ function unlockedCardsSection() {
  * check-in de ánimo (DailyCheckin.jsx) queda desactivado pero sin borrar,
  * por si se retoma más adelante.
  */
-const Home = ({ onNavigate, identity }) => {
+const Home = ({ onNavigate, identity, unreadLetters = 0 }) => {
   const sections = useMemo(() => {
     let isUnlocked = false;
     try {
@@ -80,23 +87,33 @@ const Home = ({ onNavigate, identity }) => {
       </p>
 
       <div className="home-sections-stack">
-        {sections.map(({ tab, icon: Icon, title, description }) => (
-          <button
-            key={tab}
-            type="button"
-            className="home-section-card"
-            onClick={() => onNavigate(tab)}
-          >
-            <span className="home-section-icon">
-              <Icon size={18} />
-            </span>
-            <span className="home-section-text">
-              <span className="home-section-title">{title}</span>
-              <span className="home-section-desc">{description}</span>
-            </span>
-            <ChevronRight size={16} className="home-section-arrow" />
-          </button>
-        ))}
+        {sections.map(({ tab, icon: Icon, title, description }) => {
+          const hasUnread = tab === 'letters' && unreadLetters > 0;
+          return (
+            <button
+              key={tab}
+              type="button"
+              className={`home-section-card ${hasUnread ? 'has-unread-letter' : ''}`}
+              onClick={() => onNavigate(tab)}
+            >
+              <span className="home-section-icon">
+                <Icon size={18} />
+              </span>
+              <span className="home-section-text">
+                <span className="home-section-title">{title}</span>
+                <span className="home-section-desc">
+                  {hasUnread
+                    ? unreadLetters === 1
+                      ? 'Tenés una carta sin abrir.'
+                      : `Tenés ${unreadLetters} cartas sin abrir.`
+                    : description}
+                </span>
+              </span>
+              {hasUnread && <span className="home-section-badge">{unreadLetters}</span>}
+              <ChevronRight size={16} className="home-section-arrow" />
+            </button>
+          );
+        })}
       </div>
 
       <NotificationsCard identity={identity} />

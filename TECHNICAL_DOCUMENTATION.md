@@ -301,6 +301,30 @@ npm run check:links   # sale con código 1 si hay algún enlace roto o sin mapsQ
 
 ---
 
+## 💌 8b. Cartas (Gonza ↔ Juli)
+
+- Uno escribe sobre la hoja (tipografía *Playwrite AR*, cursiva escolar
+  argentina, tinta azul, papel crema con pliegues en tercios) y al otro le
+  llega el push "Gonza te escribió una carta 💌". Al entrar a la app (o al
+  tocar el aviso, que abre `/?carta=<id>`) aparece el sobre a pantalla
+  completa: se rompe el lacre, se abre la solapa y la carta se despliega en tres.
+- **Archivos**: `components/letters/*`, `services/lettersService.js`,
+  `styles/letters.css`, `scripts/supabase-letters.sql`.
+- **Push**: reusa todo el sistema existente. El INSERT en `letters` dispara el
+  mismo trigger `notify_partner_on_insert()` → `notify-partner`, que para esta
+  tabla avisa a `to_person` (no a "el otro de created_by").
+- **Despliegue en tres**: tres copias de la hoja recortadas a su tercio con
+  `clip-path`, cada una girando sobre su pliegue (`rotateX`); funciona con
+  cualquier largo de texto. Hay timers de respaldo por si algún
+  `onAnimationComplete` no llega (pestaña en segundo plano).
+- **Dev**: en `npm run dev` las cartas van a localStorage
+  (`citas_dev_letters_v1`) y se sincronizan entre pestañas con el evento
+  `storage`, así nunca le llega una carta de prueba a nadie. Para probar los
+  dos lados: una pestaña como Gonza y otra cambiando a Juli con la pastilla
+  del Navbar. `VITE_LETTERS_BACKEND=supabase` fuerza la tabla real en dev.
+
+---
+
 ## 🚀 9. Comandos Útiles para Futuros Agentes
 
 - **Iniciar Servidor de Desarrollo**:

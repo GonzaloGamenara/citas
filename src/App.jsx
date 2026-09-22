@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import BackgroundSparkles from './components/BackgroundSparkles';
 import Navbar from './components/Navbar';
@@ -9,6 +9,10 @@ import CardsModule from './components/CardsModule';
 import CandleOverlay from './components/CandleOverlay';
 import InstallPwaGuide from './components/InstallPwaGuide';
 import IdentityGate from './components/IdentityGate';
+import LettersModule from './components/letters/LettersModule';
+import LetterOpening from './components/letters/LetterOpening';
+import LetterComposer from './components/letters/LetterComposer';
+import { PaperFilters } from './components/letters/LetterPaper';
 import { loadIdentity, saveIdentity } from './utils/identity';
 import { clearBadge } from './utils/push';
 import { getTodayLocalISO } from './utils/dateUtils';
@@ -17,7 +21,9 @@ import { fetchDates, upsertDate, deleteDate, subscribeToDates } from './services
 import { fetchWishlist, upsertWish, deleteWish, subscribeToWishlist } from './services/wishlistService';
 import { fetchMoodForDay, setMoodForDay, subscribeToMood } from './services/moodService';
 import { migrateLocalDataIfNeeded } from './services/migrateLocalData';
+import { fetchLetters, sendLetter, markLetterOpened, deleteLetter, subscribeToLetters } from './services/lettersService';
 import './styles/theme.css';
+import './styles/letters.css';
 
 const INITIAL_HISTORY_DATES = [
   {
@@ -137,6 +143,86 @@ function App() {
   const [syncState, setSyncState] = useState('loading');
 
   const todayISO = getTodayLocalISO();
+
+  // ---------------- Cartas ----------------
+  const [letters, setLetters] = useState([]);
+  const [lettersLoaded, setLettersLoaded] = useState(false);
+  // { letter, preview } de la carta que se está mostrando con la animación del sobre
+  const [openLetter, setOpenLetter] = useState(null);
+  const [isComposing, setIsComposing] = useState(false);
+  // Cartas que ya saltaron en esta sesión: si se cierra el sobre sin abrirlo,
+  // no vuelve a aparecer enseguida (queda en Cartas como "sin abrir").
+  const shownLetterIds = useRef(new Set());
+
+  // Carga inicial + tiempo real: si llega una carta con la app abierta, el sobre aparece solo
+  useEffect(() => {
+    let cancelled = false;
+    fetchLetters()
+      .then((list) => !cancelled && setLetters(list))
+      .catch((e) => console.error('No se pudieron cargar las cartas:', e))
+      .finally(() => !cancelled && setLettersLoaded(true));
+
+    const unsubscribe = subscribeToLetters({
+      onInsert: (letter) => setLetters((prev) => (prev.some((l) => l.id === letter.id) ? prev : [letter, ...prev])),
+      onUpdate: (letter) => setLetters((prev) => prev.map((l) => (l.id === letter.id ? letter : l))),
+      onDelete: (id) => setLetters((prev) => prev.filter((l) => l.id !== id))
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
+
+  // Tocar la notificación abre la app en /?carta=<id> (ver notify-partner)
+  useEffect(() => {
+    if (!lettersLoaded) return;
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('carta');
+    if (!id) return;
+    const letter = letters.find((l) => l.id === id);
+    if (letter) {
+      shownLetterIds.current.add(letter.id);
+      setOpenLetter({ letter });
+    }
+    params.delete('carta');
+    const query = params.toString();
+    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lettersLoaded]);
+
+  // Carta sin abrir para quien usa este teléfono → sobre a pantalla completa
+  useEffect(() => {
+    if (!identity || openLetter || isComposing) return;
+    const pending = letters
+      .filter((l) => !l.openedAt && l.to === identity && !shownLetterIds.current.has(l.id))
+      .sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))[0];
+    if (pending) {
+      shownLetterIds.current.add(pending.id);
+      setOpenLetter({ letter: pending });
+    }
+  }, [letters, identity, openLetter, isComposing]);
+
+  const handleLetterOpened = useCallback(
+    (letter) => {
+      if (letter.openedAt || letter.to !== identity) return;
+      const openedAt = new Date().toISOString();
+      setLetters((prev) => prev.map((l) => (l.id === letter.id ? { ...l, openedAt } : l)));
+      markLetterOpened(letter.id).catch((e) => console.error('Error marcando la carta como abierta:', e));
+    },
+    [identity]
+  );
+
+  const handleSendLetter = useCallback(async ({ from, to, body }) => {
+    const letter = await sendLetter({ from, to, body });
+    setLetters((prev) => (prev.some((l) => l.id === letter.id) ? prev : [letter, ...prev]));
+  }, []);
+
+  const handleDeleteLetter = useCallback((id) => {
+    setLetters((prev) => prev.filter((l) => l.id !== id));
+    deleteLetter(id).catch((e) => console.error('Error borrando la carta:', e));
+  }, []);
+
+  const unreadLetters = letters.filter((l) => !l.openedAt && l.to === identity).length;
 
   // Volver a la app cuenta como "ya lo vi": se apaga el puntito del ícono y
   // se cierran los avisos que quedaron en la bandeja.
@@ -337,6 +423,7 @@ function App() {
       <BackgroundSparkles />
       <CandleOverlay isCandleMode={isCandleMode} />
       <InstallPwaGuide />
+      <PaperFilters />
 
       {syncState === 'offline' && (
         <div className="sync-banner">
@@ -355,7 +442,7 @@ function App() {
 
       <AnimatePresence mode="wait">
         {activeTab === 'home' && (
-          <Home key="home-tab" onNavigate={setActiveTab} identity={identity} />
+          <Home key="home-tab" onNavigate={setActiveTab} identity={identity} unreadLetters={unreadLetters} />
         )}
 
         {activeTab === 'history' && (
@@ -380,6 +467,48 @@ function App() {
 
         {activeTab === 'cards' && (
           <CardsModule key="cards-tab" />
+        )}
+
+        {activeTab === 'letters' && (
+          <LettersModule
+            key="letters-tab"
+            letters={letters}
+            identity={identity}
+            onWrite={() => setIsComposing(true)}
+            onOpenLetter={(letter) => setOpenLetter({ letter })}
+            onDeleteLetter={handleDeleteLetter}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isComposing && (
+          <LetterComposer
+            key="letter-composer"
+            identity={identity}
+            onClose={() => setIsComposing(false)}
+            onSend={handleSendLetter}
+            onPreview={(draft) =>
+              setOpenLetter({ letter: { ...draft, id: 'preview', createdAt: new Date().toISOString() }, preview: true })
+            }
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {openLetter && (
+          <LetterOpening
+            key={`letter-${openLetter.letter.id}-${openLetter.preview ? 'p' : 'r'}`}
+            letter={openLetter.letter}
+            preview={openLetter.preview}
+            identity={identity}
+            onClose={() => setOpenLetter(null)}
+            onOpened={openLetter.preview ? undefined : handleLetterOpened}
+            onReply={() => {
+              setOpenLetter(null);
+              setIsComposing(true);
+            }}
+          />
         )}
       </AnimatePresence>
     </main>

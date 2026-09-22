@@ -1,8 +1,9 @@
 /**
- * Manda la notificación al OTRO cuando aparece una cita o un pendiente nuevo.
+ * Manda la notificación al OTRO cuando aparece una cita, un pendiente o una
+ * carta nueva.
  *
- * La dispara un Database Webhook de Supabase en el INSERT de `dates` y
- * `wishlist` (ver scripts/supabase-schema.sql para el SQL que los crea).
+ * La dispara un trigger de Postgres en el INSERT de `dates`, `wishlist` y
+ * `letters` (ver scripts/supabase-schema.sql y scripts/supabase-letters.sql).
  *
  * Por qué acá y no en el cliente: el push hay que firmarlo con la clave
  * privada VAPID, que no puede vivir en el bundle del navegador. Además, el
@@ -42,6 +43,18 @@ function partnerOf(userKey: string | null): string | null {
 }
 
 function buildMessage(table: string, row: Record<string, unknown>) {
+  if (table === 'letters') {
+    const from = NAMES[String(row.from_person ?? '')] ?? 'Alguien';
+    return {
+      title: `${from} te escribió una carta 💌`,
+      body: 'Abrila cuando tengas un ratito.',
+      // Un tag por carta: si llegan dos, no se pisan en la bandeja
+      tag: `carta-${row.id}`,
+      // La app abre el sobre de esta carta al entrar por este link
+      url: `/?carta=${encodeURIComponent(String(row.id))}`
+    };
+  }
+
   const author = NAMES[String(row.created_by ?? '')] ?? 'Alguien';
   const title = String(row.title ?? '').trim();
 
@@ -85,12 +98,16 @@ Deno.serve(async (req) => {
   }
 
   const { type, table, record } = payload;
-  if (type !== 'INSERT' || !record || (table !== 'dates' && table !== 'wishlist')) {
+  if (type !== 'INSERT' || !record || !table || !['dates', 'wishlist', 'letters'].includes(table)) {
     // Ediciones y borrados no avisan: sólo las novedades.
     return new Response(JSON.stringify({ skipped: true }), { status: 200 });
   }
 
-  const target = partnerOf((record.created_by as string) ?? null);
+  // Las cartas dicen explícitamente para quién son; lo demás va al otro de quien lo creó
+  const target =
+    table === 'letters'
+      ? (NAMES[String(record.to_person)] ? String(record.to_person) : null)
+      : partnerOf((record.created_by as string) ?? null);
   if (!target) {
     console.log('Fila sin created_by: no hay a quién avisarle.');
     return new Response(JSON.stringify({ skipped: 'sin autor' }), { status: 200 });
