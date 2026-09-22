@@ -26,6 +26,7 @@ function fromRow(row) {
     from: row.from_person,
     to: row.to_person,
     body: row.body,
+    font: row.font || null,
     createdAt: row.created_at,
     openedAt: row.opened_at
   };
@@ -37,6 +38,7 @@ function toRow(letter) {
     from_person: letter.from,
     to_person: letter.to,
     body: letter.body,
+    font: letter.font,
     created_at: letter.createdAt,
     opened_at: letter.openedAt
   };
@@ -104,7 +106,13 @@ const remote = {
     return data.map(fromRow);
   },
   async insert(letter) {
-    const { error } = await supabase.from(TABLE).insert(toRow(letter));
+    let { error } = await supabase.from(TABLE).insert(toRow(letter));
+    // PGRST204: la columna `font` todavía no existe (falta correr el ALTER de
+    // supabase-letters.sql). La carta se manda igual, con la letra por defecto.
+    if (error?.code === 'PGRST204') {
+      const { font, ...withoutFont } = toRow(letter);
+      ({ error } = await supabase.from(TABLE).insert(withoutFont));
+    }
     if (error) throw error;
   },
   async markOpened(id, openedAt) {
@@ -136,12 +144,13 @@ export const deleteLetter = (id) => backend.remove(id);
 export const subscribeToLetters = (handlers) => backend.subscribe(handlers);
 
 /** Crea la carta (en producción el trigger de la base le manda el push al otro). Devuelve la carta creada. */
-export async function sendLetter({ from, to, body }) {
+export async function sendLetter({ from, to, body, font }) {
   const letter = {
     id: `letter-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     from,
     to,
     body: body.trim(),
+    font: font || null,
     createdAt: new Date().toISOString(),
     openedAt: null
   };

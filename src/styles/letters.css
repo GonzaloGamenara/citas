@@ -40,8 +40,16 @@
     radial-gradient(ellipse at 20% 10%, rgba(255, 255, 255, 0.55) 0%, transparent 55%),
     radial-gradient(ellipse at 85% 90%, rgba(190, 170, 130, 0.18) 0%, transparent 60%),
     var(--letter-paper);
-  filter: url(#letter-deckle);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
+  -webkit-mask-image: var(--paper-mask);
+  mask-image: var(--paper-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+/* La sombra va sólo en la hoja quieta: en las copias que giran no se ve
+   (el clip-path la recorta) y cuesta pintarla. */
+.letter-paper-read {
+  filter: drop-shadow(0 16px 30px rgba(0, 0, 0, 0.35));
 }
 
 /* Pliegues en tercios, como en la carta de verdad */
@@ -55,14 +63,14 @@
     linear-gradient(
       to bottom,
       transparent calc(33.333% - 6px),
-      rgba(120, 100, 70, 0.1) calc(33.333% - 1px),
-      rgba(255, 255, 255, 0.7) 33.333%,
-      rgba(120, 100, 70, 0.05) calc(33.333% + 5px),
+      rgba(120, 100, 70, 0.035) calc(33.333% - 1px),
+      rgba(255, 255, 255, 0.28) 33.333%,
+      rgba(120, 100, 70, 0.015) calc(33.333% + 5px),
       transparent calc(33.333% + 14px),
       transparent calc(66.667% - 6px),
-      rgba(120, 100, 70, 0.1) calc(66.667% - 1px),
-      rgba(255, 255, 255, 0.7) 66.667%,
-      rgba(120, 100, 70, 0.05) calc(66.667% + 5px),
+      rgba(120, 100, 70, 0.035) calc(66.667% - 1px),
+      rgba(255, 255, 255, 0.28) 66.667%,
+      rgba(120, 100, 70, 0.015) calc(66.667% + 5px),
       transparent calc(66.667% + 14px)
     );
 }
@@ -96,6 +104,13 @@
   background: linear-gradient(180deg, var(--letter-paper-shade) 0%, var(--letter-paper) 100%);
 }
 
+/* Cada letra con su tamaño: a igual font-size unas se ven diminutas y otras enormes */
+.letter-font-playwrite { font-family: 'Playwrite AR', cursive; font-size: 15px; line-height: 2.05; }
+.letter-font-dancing { font-family: 'Dancing Script', cursive; font-size: 21px; line-height: 1.6; font-weight: 500; }
+.letter-font-homemade { font-family: 'Homemade Apple', cursive; font-size: 14.5px; line-height: 2.15; }
+.letter-font-vibes { font-family: 'Great Vibes', cursive; font-size: 25px; line-height: 1.45; }
+.letter-font-caveat { font-family: 'Caveat', cursive; font-size: 22px; line-height: 1.5; font-weight: 500; }
+
 /* ---------------- Overlay (escritorio) ---------------- */
 .letter-overlay {
   position: fixed;
@@ -108,10 +123,7 @@
   overscroll-behavior: contain;
 }
 
-.letter-overlay.stage-envelope,
-.letter-overlay.stage-opening,
-.letter-overlay.stage-rising,
-.letter-overlay.stage-unfolding {
+.letter-overlay:not(.stage-read) {
   overflow-y: hidden;
 }
 
@@ -124,14 +136,12 @@
   height: 38px;
   border-radius: 50%;
   border: 1px solid rgba(255, 240, 220, 0.25);
-  background: rgba(20, 10, 6, 0.45);
+  background: rgba(20, 10, 6, 0.6);
   color: #f6ead8;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .letter-close-inline {
@@ -174,101 +184,97 @@
   padding: max(64px, calc(env(safe-area-inset-top) + 56px)) 16px max(32px, env(safe-area-inset-bottom));
 }
 
-.letter-wrap {
-  position: relative;
-  width: var(--letter-width);
-  flex-shrink: 0;
+/* En lectura el padding de arriba lo calcula LetterOpening para que la hoja
+   quede exactamente donde terminó el despliegue. */
+.letter-scroll-read {
+  --pad-top: 64px;
+  justify-content: flex-start;
 }
 
-/* ---------------- Sobre ---------------- */
-.letter-envelope-stage {
+/* ---------------- Escena: sobre (atrás) · carta · sobre (adelante) ---------------- */
+.letter-scene {
   position: fixed;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.6rem;
-  padding: 0 16px;
+  display: grid;
+  place-items: center;
   pointer-events: none;
 }
 
-.envelope {
-  --env-w: min(calc(100vw - 48px), 360px);
+.letter-scene > * {
+  grid-area: 1 / 1;
+}
+
+.env-layer { position: relative; z-index: 1; }
+.env-layer-front { z-index: 3; }
+.envelope-hint { z-index: 3; }
+
+.letter-holder {
   position: relative;
-  width: var(--env-w);
-  height: calc(var(--env-w) * 0.64);
+  z-index: 2;
+  width: var(--letter-width);
+  will-change: transform, opacity;
+}
+
+.envelope-rear,
+.envelope-front {
+  position: absolute;
+  inset: 0;
+  display: block;
+  perspective: 900px;
+}
+
+.envelope-front {
   border: 0;
   padding: 0;
   background: none;
   cursor: pointer;
   pointer-events: auto;
-  perspective: 900px;
-  filter: drop-shadow(0 22px 30px rgba(0, 0, 0, 0.45));
 }
 
-.envelope > span {
+.envelope-rear > span,
+.envelope-front > span {
   position: absolute;
   display: block;
 }
 
 .envelope-back {
   inset: 0;
-  z-index: 1;
   border-radius: 6px;
-  background: linear-gradient(160deg, #e9dcc3 0%, #dccaa9 100%);
+  background: linear-gradient(160deg, #e9dcc3 0%, #d8c5a2 100%);
+  box-shadow: 0 22px 40px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
-/* La punta de la carta que asoma cuando se abre la solapa */
-.envelope-peek {
-  left: 7%;
-  right: 7%;
-  top: 8%;
-  height: 80%;
-  z-index: 3;
-  background: var(--letter-paper);
-  border-radius: 2px;
-  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.08);
-  transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.3, 1) 0.45s;
+/* La solapa vive atrás: sus bordes coinciden con la V del bolsillo, así que
+   cerrada se ve igual, y abierta queda detrás de la carta que sale. */
+.envelope-flap {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 56%;
+  background: linear-gradient(180deg, #ecdfc5 0%, #dccaa8 100%);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  transition: transform 0.6s cubic-bezier(0.5, 0, 0.3, 1) 0.15s;
+  backface-visibility: visible;
 }
 
-.envelope.is-open .envelope-peek {
-  transform: translateY(-38%);
+.envelope-rear.is-open .envelope-flap {
+  transform: rotateX(180deg);
 }
 
 .envelope-pocket {
   inset: 0;
-  z-index: 4;
   border-radius: 6px;
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.35) 0%, transparent 40%),
     linear-gradient(170deg, #f1e6d0 0%, #e4d4b6 100%);
   clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%);
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
-}
-
-.envelope-flap {
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 60%;
-  z-index: 6;
-  background: linear-gradient(180deg, #e8d9bc 0%, #ddc9a6 100%);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  transform-origin: 50% 0;
-  transition: transform 0.65s cubic-bezier(0.5, 0, 0.3, 1) 0.2s, z-index 0s linear 0.52s;
-}
-
-.envelope.is-open .envelope-flap {
-  transform: rotateX(180deg);
-  z-index: 2;
 }
 
 .envelope-address {
   left: 0;
   right: 0;
   bottom: 7%;
-  z-index: 5;
   text-align: center;
   font-family: var(--letter-font);
   font-size: 1.15rem;
@@ -284,8 +290,7 @@
 
 .wax-seal {
   left: 50%;
-  top: 60%;
-  z-index: 7;
+  top: 56%;
   width: 58px;
   height: 58px;
   margin: -29px 0 0 -29px;
@@ -298,8 +303,7 @@
   display: flex !important;
   align-items: center;
   justify-content: center;
-  transform: translateY(-58%);
-  transition: transform 0.35s ease, opacity 0.35s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   animation: sealPulse 2.4s ease-in-out infinite;
 }
 
@@ -321,15 +325,15 @@
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.envelope.is-open .wax-seal {
+.envelope-front.is-open .wax-seal {
   animation: none;
-  transform: translateY(-58%) scale(1.25) rotate(12deg);
+  transform: scale(1.3) rotate(12deg);
   opacity: 0;
 }
 
 @keyframes sealPulse {
-  0%, 100% { transform: translateY(-58%) scale(1); }
-  50% { transform: translateY(-58%) scale(1.06); }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
 }
 
 .envelope-hint {
@@ -342,14 +346,11 @@
   opacity: 0.9;
 }
 
-
-
-
-
 /* ---------------- Despliegue en tres ---------------- */
 .letter-fold {
   position: relative;
   width: 100%;
+  height: 100%;
   perspective: 2200px;
   transform-style: preserve-3d;
 }
@@ -358,6 +359,7 @@
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .fold-face {
@@ -470,6 +472,43 @@
 
 
 
+
+.composer-font-picker {
+  width: var(--letter-width);
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 0 0 0.8rem;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.composer-font-picker::-webkit-scrollbar { display: none; }
+
+/* Cada chip se muestra en su propia letra; tamaño fijo para que entren todos */
+.composer-font-chip {
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 240, 220, 0.3);
+  background: rgba(255, 245, 230, 0.06);
+  color: #f6ead8;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 15px !important;
+  line-height: 1.4 !important;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.composer-font-chip.letter-font-vibes { font-size: 19px !important; }
+.composer-font-chip.letter-font-dancing,
+.composer-font-chip.letter-font-caveat { font-size: 18px !important; }
+.composer-font-chip.letter-font-homemade { font-size: 12px !important; }
+
+.composer-font-chip.active {
+  background: #f6ead8;
+  color: #3a2014;
+  border-color: #f6ead8;
+}
 
 .composer-scroll {
   flex: 1 0 auto;

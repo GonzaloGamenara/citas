@@ -17,6 +17,9 @@ create table if not exists public.letters (
   notified_at timestamptz
 );
 
+-- Letra elegida al escribir (ver src/components/letters/letterFonts.js). null = la escolar.
+alter table public.letters add column if not exists font text;
+
 -- Mismo criterio que el resto del esquema: sin login, RLS sólo acota a la tabla.
 alter table public.letters enable row level security;
 

@@ -12,7 +12,6 @@ import IdentityGate from './components/IdentityGate';
 import LettersModule from './components/letters/LettersModule';
 import LetterOpening from './components/letters/LetterOpening';
 import LetterComposer from './components/letters/LetterComposer';
-import { PaperFilters } from './components/letters/LetterPaper';
 import { loadIdentity, saveIdentity } from './utils/identity';
 import { clearBadge } from './utils/push';
 import { getTodayLocalISO } from './utils/dateUtils';
@@ -212,8 +211,8 @@ function App() {
     [identity]
   );
 
-  const handleSendLetter = useCallback(async ({ from, to, body }) => {
-    const letter = await sendLetter({ from, to, body });
+  const handleSendLetter = useCallback(async ({ from, to, body, font }) => {
+    const letter = await sendLetter({ from, to, body, font });
     setLetters((prev) => (prev.some((l) => l.id === letter.id) ? prev : [letter, ...prev]));
   }, []);
 
@@ -423,7 +422,6 @@ function App() {
       <BackgroundSparkles />
       <CandleOverlay isCandleMode={isCandleMode} />
       <InstallPwaGuide />
-      <PaperFilters />
 
       {syncState === 'offline' && (
         <div className="sync-banner">

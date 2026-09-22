@@ -3,9 +3,21 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Eye, Send, Mail } from 'lucide-react';
 import LetterPaper from './LetterPaper';
+import { LETTER_FONTS, DEFAULT_LETTER_FONT } from './letterFonts';
+import { useThemeColor } from '../../utils/themeColor';
 import { personName, partnerOf } from '../../utils/identity';
 
 const DRAFT_KEY = 'citas_letter_draft_v1';
+const FONT_KEY = 'citas_letter_font_v1';
+
+function loadFont() {
+  try {
+    const saved = localStorage.getItem(FONT_KEY);
+    return LETTER_FONTS.some((f) => f.id === saved) ? saved : DEFAULT_LETTER_FONT;
+  } catch {
+    return DEFAULT_LETTER_FONT;
+  }
+}
 
 function loadDraft() {
   try {
@@ -34,11 +46,22 @@ const LetterComposer = ({ identity, onClose, onSend, onPreview }) => {
   const to = partnerOf(identity);
   const toName = personName(to);
   const [body, setBody] = useState(loadDraft);
+  const [font, setFont] = useState(loadFont);
   const [confirming, setConfirming] = useState(false);
   const [status, setStatus] = useState('writing'); // writing | sending | sent | error
   const textareaRef = useRef(null);
 
   useEffect(() => saveDraft(body), [body]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(FONT_KEY, font);
+    } catch {
+      /* es una comodidad */
+    }
+  }, [font]);
+
+  useThemeColor('#3f2418');
 
   // El textarea crece con el texto: la hoja se alarga como una carta de verdad
   useLayoutEffect(() => {
@@ -46,7 +69,7 @@ const LetterComposer = ({ identity, onClose, onSend, onPreview }) => {
     if (!el) return;
     el.style.height = 'auto';
     el.style.height = `${el.scrollHeight}px`;
-  }, [body]);
+  }, [body, font]);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -61,7 +84,7 @@ const LetterComposer = ({ identity, onClose, onSend, onPreview }) => {
   const handleSend = async () => {
     setStatus('sending');
     try {
-      await onSend({ from, to, body });
+      await onSend({ from, to, body, font });
       saveDraft('');
       setStatus('sent');
       setTimeout(onClose, 2200);
@@ -125,7 +148,21 @@ const LetterComposer = ({ identity, onClose, onSend, onPreview }) => {
             exit={{ opacity: 0, y: -60, scale: 0.9 }}
             transition={{ duration: 0.35 }}
           >
-            <LetterPaper from={from} className="letter-paper-read letter-paper-editable">
+            <div className="composer-font-picker" role="radiogroup" aria-label="Letra">
+              {LETTER_FONTS.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={font === f.id}
+                  className={`composer-font-chip letter-font-${f.id} ${font === f.id ? 'active' : ''}`}
+                  onClick={() => setFont(f.id)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            <LetterPaper from={from} font={font} className="letter-paper-read letter-paper-editable">
               <textarea
                 ref={textareaRef}
                 className="letter-textarea"
@@ -179,7 +216,7 @@ const LetterComposer = ({ identity, onClose, onSend, onPreview }) => {
                 <button
                   type="button"
                   className="letter-btn letter-btn-ghost"
-                  onClick={() => onPreview({ from, to, body })}
+                  onClick={() => onPreview({ from, to, body, font })}
                   disabled={!hasText}
                 >
                   <Eye size={16} /> Vista previa

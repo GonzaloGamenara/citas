@@ -308,6 +308,15 @@ npm run check:links   # sale con código 1 si hay algún enlace roto o sin mapsQ
   llega el push "Gonza te escribió una carta 💌". Al entrar a la app (o al
   tocar el aviso, que abre `/?carta=<id>`) aparece el sobre a pantalla
   completa: se rompe el lacre, se abre la solapa y la carta se despliega en tres.
+- **Letras**: se elige al escribir entre 5 (`letterFonts.js`: Playwrite AR,
+  Dancing Script, Homemade Apple, Great Vibes, Caveat), cada una con su tamaño
+  en `.letter-font-*`. Se guarda en `letters.font`; si la columna no existe,
+  la carta se manda igual con la letra escolar.
+- **Rendimiento**: el borde del papel es una máscara SVG estática (no un
+  filtro feTurbulence, que trababa la animación en el celular) y nada de lo
+  que se mueve lleva `filter` ni `backdrop-filter`.
+- **Barra del sistema**: `useThemeColor` la pone color escritorio mientras hay
+  una carta o el redactor abierto.
 - **Archivos**: `components/letters/*`, `services/lettersService.js`,
   `styles/letters.css`, `scripts/supabase-letters.sql`.
 - **Push**: reusa todo el sistema existente. El INSERT en `letters` dispara el
